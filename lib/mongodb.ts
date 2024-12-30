@@ -1,34 +1,39 @@
 import mongoose from 'mongoose';
 
+// MongoDB URI from environment variables
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/jirant';
 
-if (!process.env.MONGO_URI) {
-  throw new Error('Missing MONGO_URI in .env.local');
-}
+// Cached variables for Mongoose and the raw MongoDB client
+let cachedMongooseConn: mongoose.Mongoose | null = null;
+let cachedMongoClientPromise: Promise<any> | null = null;
 
-interface MongooseCache {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
-}
-
-// Use a global cache to avoid reconnecting in development mode
-let cached: MongooseCache = (global as any).mongoose;
-
-if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
-}
-
-async function connectToDatabase(): Promise<typeof mongoose> {
-  if (cached.conn) {
-    return cached.conn;
+/**
+ * Connect to MongoDB with Mongoose
+ * This function is used for general database operations with Mongoose models.
+ */
+export async function connectToDatabase(): Promise<typeof mongoose> {
+  if (cachedMongooseConn) {
+    console.log('Using cached Mongoose connection');
+    return cachedMongooseConn;
   }
 
-  if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGO_URI);
-  }
-
-  cached.conn = await cached.promise;
-  return cached.conn;
+  console.log('Establishing new Mongoose connection...');
+  cachedMongooseConn = await mongoose.connect(MONGO_URI);
+  console.log('Mongoose connected successfully');
+  return cachedMongooseConn;
 }
 
-export default connectToDatabase;
+/**
+ * Get the MongoDB client for NextAuth.js
+ * This function is used by NextAuth's MongoDB adapter.
+ */
+export function getMongoClient(): Promise<any> {
+  if (!cachedMongoClientPromise) {
+    console.log('Establishing MongoDB client connection...');
+    cachedMongoClientPromise = mongoose.connect(MONGO_URI).then((mongooseConnection) => {
+      console.log('MongoDB client connected successfully');
+      return mongooseConnection.connection.getClient(); // Return raw MongoDB client
+    });
+  }
+  return cachedMongoClientPromise;
+}

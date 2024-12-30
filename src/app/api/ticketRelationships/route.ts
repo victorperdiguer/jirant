@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import connectToDatabase from '../../../../lib/mongodb';
+import {connectToDatabase} from '../../../../lib/mongodb';
 import TicketRelationship from '../../../../models/TicketRelationship';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
