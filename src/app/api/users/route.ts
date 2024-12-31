@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { connectToDatabase } from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 
@@ -15,7 +15,7 @@ export async function GET() {
 }
 
 // DELETE: Remove a user by ID
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
   await connectToDatabase();
 
   try {
