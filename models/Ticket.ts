@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 interface ITicket extends Document {
   title: string;
   description: string;
-  status: 'open' | 'in-progress' | 'closed';
+  status: 'active' | 'deleted';
   createdBy: Types.ObjectId;
   relatedTickets: Types.ObjectId[];
   ticketType: Types.ObjectId; // Reference to TicketType
@@ -13,7 +13,7 @@ interface ITicket extends Document {
 const TicketSchema = new Schema<ITicket>({
   title: { type: String, required: true },
   description: { type: String, required: true },
-  status: { type: String, default: 'open', enum: ['open', 'in-progress', 'closed'] },
+  status: { type: String, default: 'active', enum: ['active', 'deleted'] },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   relatedTickets: [{ type: Schema.Types.ObjectId, ref: 'Ticket' }],
   ticketType: { type: Schema.Types.ObjectId, ref: 'TicketType', required: true }, // Link to TicketType

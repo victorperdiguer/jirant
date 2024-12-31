@@ -39,7 +39,7 @@ export async function PATCH(request: Request, { params }: { params: { ticketId: 
     // Validate and resolve createdBy if updated
     let user = null;
     if (body.createdBy) {
-      user = await User.findOne({ name: body.createdBy });
+      user = await User.findOne({ _id: body.createdBy });
       if (!user) {
         return NextResponse.json({ error: `Invalid createdBy: ${body.createdBy}` }, { status: 400 });
       }
@@ -60,7 +60,7 @@ export async function PATCH(request: Request, { params }: { params: { ticketId: 
     return NextResponse.json(ticket, { status: 200 });
   } catch (error) {
     console.error('Error updating ticket:', error);
-    return NextResponse.json({ error: 'Failed to update ticket' }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to update ticket', error }, { status: 500 });
   }
 }
 

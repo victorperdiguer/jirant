@@ -28,13 +28,13 @@ export async function POST(request: Request) {
     // Validate and resolve ticketType
     const ticketType = await TicketType.findOne({ name: body.ticketType });
     if (!ticketType) {
-      return NextResponse.json({ error: `Invalid ticketType: ${body.ticketType}` }, { status: 400 });
+      return NextResponse.json({ message: `Invalid ticketType: ${body.ticketType}` }, { status: 400 });
     }
 
     // Validate and resolve createdBy
-    const user = await User.findOne({ name: body.createdBy });
+    const user = await User.findOne({ _id: body.createdBy });
     if (!user) {
-      return NextResponse.json({ error: `Invalid createdBy: ${body.createdBy}` }, { status: 400 });
+      return NextResponse.json({ message: `Invalid createdBy: ${body.createdBy}` }, { status: 400 });
     }
 
     // Create the ticket with resolved ObjectIds
@@ -47,7 +47,6 @@ export async function POST(request: Request) {
     console.log('Ticket created:', ticket);
     return NextResponse.json(ticket, { status: 201 });
   } catch (error) {
-    console.error('Error during POST /api/tickets:', error);
-    return NextResponse.json({ error: 'Failed to create ticket' }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to create ticket', error }, { status: 500 });
   }
 }

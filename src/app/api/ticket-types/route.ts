@@ -9,7 +9,7 @@ export async function GET() {
     const ticketTypes = await TicketType.find();
     return NextResponse.json(ticketTypes, {status: 200})
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch ticket types' }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to fetch ticket types', error }, { status: 500 });
   }
 }
 
