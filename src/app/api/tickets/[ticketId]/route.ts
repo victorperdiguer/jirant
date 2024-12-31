@@ -67,7 +67,7 @@ export async function PATCH(request: Request, { params }: { params: { ticketId: 
 // DELETE: Delete a specific ticket by ID
 export async function DELETE(request: Request, { params }: { params: { ticketId: string } }) {
   try {
-    const ticket = await Ticket.findByIdAndDelete(params.ticketId);
+    const ticket = await Ticket.findByIdAndUpdate(params.ticketId, {status: "deleted", new: true});
     if (!ticket) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
     }
