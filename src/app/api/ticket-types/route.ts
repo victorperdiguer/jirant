@@ -14,13 +14,35 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  await connectToDatabase()
+  await connectToDatabase();
 
   try {
-    const {name, createdBy} = await request.json()
-    const ticketType = await TicketType.create({ name, createdBy })
-    return NextResponse.json(ticketType, {status: 201})
+    // Parse the request body
+    const { name, description, details, templateStructure, createdBy } = await request.json();
+
+    // Validate required fields
+    if (!name) {
+      return NextResponse.json(
+        { message: 'Name is required' },
+        { status: 400 }
+      );
+    }
+
+    // Create the ticket type with the provided data
+    const ticketType = await TicketType.create({
+      name,
+      description: description || '', // Default to empty string if not provided
+      details: details || '',         // Default to empty string if not provided
+      templateStructure: templateStructure || [], // Default to an empty array
+      createdBy: createdBy || null,   // Default to null if not provided
+    });
+
+    return NextResponse.json(ticketType, { status: 201 });
   } catch (error) {
-      return NextResponse.json({ message: "Couldn't create ticket type", error }, { status: 500 });
+    console.error('Error creating ticket type:', error);
+    return NextResponse.json(
+      { message: "Couldn't create ticket type", error },
+      { status: 500 }
+    );
   }
 }
