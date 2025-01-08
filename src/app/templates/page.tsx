@@ -1,9 +1,12 @@
 'use client'
 import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Bug, FileText, Zap, Lightbulb, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Bug, FileText, Zap, Lightbulb, Check, ArrowLeft } from "lucide-react";
 import { ITicketType } from '@/types/ticket-types';
 import { TemplateEditDialog } from "@/components/templates/TemplateEditDialog";
+import Link from "next/link";
+import { Sidebar } from "@/components/workspace/Sidebar";
 
 const iconMap = {
   'task': Check,
@@ -62,44 +65,54 @@ export default function TemplatesPage() {
     }
   };
 
-  if (isLoading) {
-    return <div className="p-8">Loading templates...</div>;
-  }
-
   return (
-    <div className="p-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Ticket Templates</h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {templates.map((template) => (
-            <Card 
-              key={template._id}
-              className="hover:border-primary cursor-pointer transition-colors"
-              onClick={() => setSelectedTemplate(template)}
-            >
-              <CardHeader>
-                <div className="flex items-center gap-3 mb-2">
-                  {getIcon(template.name)}
-                  <CardTitle>{template.name}</CardTitle>
-                </div>
-                <CardDescription>
-                  {template.description || 'No description provided'}
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
+    <div className="flex h-screen bg-background">
+      <Sidebar />
+      
+      <div className="flex-1 overflow-auto">
+        <div className="p-8">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="text-3xl font-bold">Ticket Templates</h1>
+              <Link href="/workspace">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Workspace
+                </Button>
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {templates.map((template) => (
+                <Card 
+                  key={template._id}
+                  className="hover:border-primary cursor-pointer transition-colors"
+                  onClick={() => setSelectedTemplate(template)}
+                >
+                  <CardHeader>
+                    <div className="flex items-center gap-3 mb-2">
+                      {getIcon(template.name)}
+                      <CardTitle>{template.name}</CardTitle>
+                    </div>
+                    <CardDescription>
+                      {template.description || 'No description provided'}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
 
-      {selectedTemplate && (
-        <TemplateEditDialog
-          template={selectedTemplate}
-          isOpen={!!selectedTemplate}
-          onClose={() => setSelectedTemplate(null)}
-          onSave={handleSaveTemplate}
-        />
-      )}
+        {selectedTemplate && (
+          <TemplateEditDialog
+            template={selectedTemplate}
+            isOpen={!!selectedTemplate}
+            onClose={() => setSelectedTemplate(null)}
+            onSave={handleSaveTemplate}
+          />
+        )}
+      </div>
     </div>
   );
 } 
