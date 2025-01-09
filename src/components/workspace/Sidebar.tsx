@@ -41,9 +41,6 @@ export function Sidebar() {
         if (!response.ok) throw new Error('Failed to fetch tickets');
         const data = await response.json();
 
-        // Log the data to see what we're getting
-        console.log('Fetched tickets:', data);
-
         // Filter out deleted tickets
         const activeTickets = data.filter((ticket: Ticket) => ticket.status !== 'deleted');
         setAllTickets(activeTickets);
