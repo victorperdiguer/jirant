@@ -8,6 +8,7 @@ import { useAutoResize } from '@/hooks/useAutoResize';
 import { ITicketType } from "@/types/ticket-types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { LoadingMessage } from "./LoadingMessage";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -182,7 +183,7 @@ export function WorkspaceMain() {
           {isProcessing && (
             <div className="flex justify-start">
               <div className="bg-muted rounded-lg px-4 py-2">
-                <p className="text-muted-foreground">Processing...</p>
+                <LoadingMessage />
               </div>
             </div>
           )}
