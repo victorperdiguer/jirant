@@ -20,7 +20,4 @@ const TicketSchema = new Schema<ITicket>({
   createdAt: { type: Date, default: Date.now },
 });
 
-// Clear the model if it exists to ensure schema changes are applied
-mongoose.models = {};
-
 export default mongoose.model<ITicket>('Ticket', TicketSchema);

@@ -35,26 +35,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: `Invalid createdBy: ${body.createdBy}` }, { status: 400 });
     }
 
-    // Create a new ticket document with the correct types
-    const ticketData = {
-      title: generatedTitle,
-      description: body.description,
-      ticketType: body.ticketType,
-      status: body.status || 'active',
+    // Create the ticket with generated title
+    const ticket = await Ticket.create({
+      ...body,
+      title: generatedTitle, // Use the AI-generated title
       createdBy: user._id,
-      relatedTickets: body.relatedTickets || []
-    };
-
-    // Create the ticket
-    const ticket = await Ticket.create(ticketData);
+    });
 
     console.log('Ticket created:', ticket);
     return NextResponse.json(ticket, { status: 201 });
   } catch (error) {
     console.error('Error creating ticket:', error);
-    return NextResponse.json({ 
-      message: 'Failed to create ticket', 
-      error: error instanceof Error ? error.message : String(error)
-    }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to create ticket', error }, { status: 500 });
   }
 }
