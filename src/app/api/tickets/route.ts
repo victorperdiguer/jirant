@@ -10,7 +10,10 @@ export async function GET() {
   await connectToDatabase();
 
   try {
-    const tickets = await Ticket.find().populate('ticketType').populate('relatedTickets');
+    const tickets = await Ticket.find()
+      .populate('ticketType', 'name')
+      .sort({ createdAt: -1 });
+
     return NextResponse.json(tickets, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch tickets' }, { status: 500 });

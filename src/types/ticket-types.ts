@@ -13,4 +13,15 @@ export interface ITicketType {
   details?: string;
   templateStructure?: ITemplateSection[];
   createdBy: Types.ObjectId | null;
+}
+
+export interface ParsedTicketSection {
+  sectionTitle: string;
+  content: string;
+}
+
+export interface ParsedAIResponse {
+  title: string;
+  sections: ParsedTicketSection[];
+  rawContent: string;
 } 

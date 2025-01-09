@@ -1,10 +1,18 @@
+'use client'
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Brain, Sparkles, Link2, Clock, MessageSquare } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
+  const handleStartClick = () => {
+    router.push('/workspace');
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -30,10 +38,19 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="h-12 px-8">
+              <Button 
+                size="lg" 
+                className="h-12 px-8"
+                onClick={handleStartClick}
+              >
                 Start Free Trial
               </Button>
-              <Button size="lg" variant="outline" className="h-12 px-8">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="h-12 px-8"
+                onClick={handleStartClick}
+              >
                 See it in Action
               </Button>
             </div>
@@ -90,7 +107,11 @@ export default function Home() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full mt-6" variant={plan.featured ? "default" : "outline"}>
+                  <Button 
+                    className="w-full mt-6" 
+                    variant={plan.featured ? "default" : "outline"}
+                    onClick={handleStartClick}
+                  >
                     Get Started
                   </Button>
                 </CardContent>
@@ -107,7 +128,11 @@ export default function Home() {
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
             Join product managers who are shipping better products faster with Jira'nt.
           </p>
-          <Button size="lg" className="h-12 px-8">
+          <Button 
+            size="lg" 
+            className="h-12 px-8"
+            onClick={handleStartClick}
+          >
             Try Jira'nt Free
           </Button>
         </div>

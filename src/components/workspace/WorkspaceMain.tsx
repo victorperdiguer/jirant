@@ -1,17 +1,27 @@
 'use client'
-import { Mic } from "lucide-react";
+import { Mic, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRef, useState, useEffect } from 'react';
 import { useAutoResize } from '@/hooks/useAutoResize';
 import { ITicketType } from "@/types/ticket-types";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 export function WorkspaceMain() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [ticketTypes, setTicketTypes] = useState<ITicketType[]>([]);
   const [selectedType, setSelectedType] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
   
   useAutoResize(textareaRef);
 
@@ -22,7 +32,6 @@ export function WorkspaceMain() {
         if (!response.ok) throw new Error('Failed to fetch ticket types');
         const data = await response.json();
         setTicketTypes(data);
-        // Set first type as default if available
         if (data.length > 0) {
           setSelectedType(data[0]._id);
         }
@@ -38,8 +47,86 @@ export function WorkspaceMain() {
 
   const handleTypeChange = (typeId: string) => {
     setSelectedType(typeId);
-    // Here we can add logic to update the textarea placeholder or content
-    // based on the selected template
+  };
+
+  const handleSend = async () => {
+    if (!input.trim() || !selectedType || isProcessing) return;
+
+    const userMessage = input.trim();
+    const selectedTemplate = ticketTypes.find(t => t._id === selectedType);
+
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setInput('');
+    setIsProcessing(true);
+
+    try {
+      // First, get AI response
+      const aiResponse = await fetch('/api/openai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          templateStructure: selectedTemplate?.templateStructure || [],
+          userInput: userMessage
+        }),
+      });
+
+      // Log the response for debugging
+      console.log('AI Response status:', aiResponse.status);
+      const responseText = await aiResponse.text();
+      console.log('AI Response text:', responseText);
+
+      if (!aiResponse.ok) {
+        throw new Error(`Failed to process request: ${aiResponse.status} ${responseText}`);
+      }
+      
+      // Parse the response as JSON after logging the text
+      const data = JSON.parse(responseText);
+      console.log('Data:', data);
+      const aiContent = data.generatedText as string;
+      console.log('AI Content:', aiContent);
+      
+      // Add AI response to messages
+      setMessages(prev => [...prev, { role: 'assistant', content: aiContent }]);
+
+      // Create ticket with the AI response
+      const ticketResponse = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: responseText.split('\n')[0], // First line as title
+          description: responseText,
+          ticketType: selectedTemplate?.name,
+          status: 'active',
+          createdBy: '6773d9d5e742a5daaac149d1', // Replace with actual user ID
+          relatedTickets: [] // Optional: Add related tickets if needed
+ /*          metadata: {
+            userPrompt: userMessage,
+            generatedBy: 'ai'
+          } */
+        }),
+      });
+
+      if (!ticketResponse.ok) {
+        const errorText = await ticketResponse.text();
+        console.error('Failed to create ticket:', errorText);
+        throw new Error(`Failed to create ticket: ${errorText}`);
+      }
+
+    } catch (error) {
+      console.error('Error processing request:', error);
+      console.log('Full error:', { error });
+      
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: `Error: ${error || 'An unexpected error occurred'}`
+      }]);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -74,16 +161,46 @@ export function WorkspaceMain() {
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1">
-        {/* Add your main content here */}
-      </div>
+      {/* Chat Messages Area */}
+      <ScrollArea className="flex-1 p-4">
+        <div className="max-w-3xl mx-auto space-y-4">
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={cn(
+                "flex w-full",
+                message.role === 'user' ? "justify-end" : "justify-start"
+              )}
+            >
+              <div
+                className={cn(
+                  "rounded-lg px-4 py-2 max-w-[80%]",
+                  message.role === 'user'
+                    ? "bg-primary text-primary-foreground ml-auto"
+                    : "bg-muted"
+                )}
+              >
+                <p className="whitespace-pre-wrap">{message.content}</p>
+              </div>
+            </div>
+          ))}
+          {isProcessing && (
+            <div className="flex justify-start">
+              <div className="bg-muted rounded-lg px-4 py-2">
+                <p className="text-muted-foreground">Processing...</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
 
       {/* Input Section */}
       <div className="border-t bg-background">
         <div className="max-w-3xl mx-auto relative p-4">
           <Textarea 
             ref={textareaRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
             placeholder={
               isLoading 
                 ? "Loading templates..." 
@@ -91,17 +208,33 @@ export function WorkspaceMain() {
                   ? ticketTypes.find(t => t._id === selectedType)?.details || "Define un nuevo ticket"
                   : "Select a template"
             }
-            className="min-h-[100px] max-h-[33vh] overflow-y-auto pr-12 resize-none"
-            disabled={!selectedType}
+            className="min-h-[100px] max-h-[33vh] overflow-y-auto pr-24 resize-none"
+            disabled={!selectedType || isProcessing}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
           />
-          <Button
-            size="icon"
-            variant="ghost"
-            className="absolute right-2 bottom-2 text-muted-foreground hover:text-foreground"
-            disabled={!selectedType}
-          >
-            <Mic className="h-5 w-5" />
-          </Button>
+          <div className="absolute right-6 bottom-6 flex gap-2">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="text-muted-foreground hover:text-foreground"
+              disabled={!selectedType || isProcessing}
+            >
+              <Mic className="h-5 w-5" />
+            </Button>
+            <Button
+              size="icon"
+              variant="default"
+              onClick={handleSend}
+              disabled={!input.trim() || !selectedType || isProcessing}
+            >
+              <Send className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
