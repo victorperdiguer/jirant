@@ -7,6 +7,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useSidebar } from '@/context/SidebarContext';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 interface Ticket {
   _id: string;
@@ -153,7 +158,20 @@ export function Sidebar() {
                       )}
                     >
                       {getIcon(ticket.ticketType)}
-                      <span className="text-sm truncate flex-1">{ticket.title}</span>
+                      <HoverCard openDelay={200}>
+                        <HoverCardTrigger asChild>
+                          <span className="text-sm truncate flex-1 max-w-[160px]">
+                            {ticket.title}
+                          </span>
+                        </HoverCardTrigger>
+                        <HoverCardContent 
+                          side="right" 
+                          align="start" 
+                          className="w-[300px] p-2"
+                        >
+                          <p className="text-sm font-medium">{ticket.title}</p>
+                        </HoverCardContent>
+                      </HoverCard>
                       <Button
                         size="icon"
                         variant="ghost"

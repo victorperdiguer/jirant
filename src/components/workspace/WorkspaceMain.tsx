@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { LoadingMessage } from "./LoadingMessage";
 import { useSidebar } from "@/context/SidebarContext";
+import { FormattedMessage } from "./FormattedMessage";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -181,7 +182,11 @@ export function WorkspaceMain() {
                     : "bg-muted"
                 )}
               >
-                <p className="whitespace-pre-wrap">{message.content}</p>
+                {message.role === 'user' ? (
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                ) : (
+                  <FormattedMessage content={message.content} />
+                )}
               </div>
             </div>
           ))}
