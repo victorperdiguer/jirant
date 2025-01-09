@@ -97,16 +97,11 @@ export function WorkspaceMain() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: responseText.split('\n')[0], // First line as title
-          description: responseText,
+          description: aiContent,
           ticketType: selectedTemplate?.name,
           status: 'active',
-          createdBy: '6773d9d5e742a5daaac149d1', // Replace with actual user ID
-          relatedTickets: [] // Optional: Add related tickets if needed
- /*          metadata: {
-            userPrompt: userMessage,
-            generatedBy: 'ai'
-          } */
+          createdBy: '6773d9d5e742a5daaac149d1',
+          relatedTickets: []
         }),
       });
 

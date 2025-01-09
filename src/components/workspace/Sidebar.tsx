@@ -6,14 +6,12 @@ import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search } from "lucid
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { useSidebar } from '@/context/SidebarContext';
 
 interface Ticket {
   _id: string;
   title: string;
-  ticketType: {
-    _id: string;
-    name: string;
-  };
+  ticketType: string;
   createdAt: string;
   status: string;
 }
@@ -33,8 +31,8 @@ const iconMap = {
 export function Sidebar() {
   const [tickets, setTickets] = useState<GroupedTickets>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   const [allTickets, setAllTickets] = useState<Ticket[]>([]);
+  const { searchQuery, setSearchQuery } = useSidebar();
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -154,7 +152,7 @@ export function Sidebar() {
                         "cursor-pointer"
                       )}
                     >
-                      {getIcon(ticket.ticketType.name)}
+                      {getIcon(ticket.ticketType)}
                       <span className="text-sm truncate flex-1">{ticket.title}</span>
                       <Button
                         size="icon"

@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import {connectToDatabase} from '../../../../lib/mongodb';
 import Ticket from '../../../../models/Ticket';
-import TicketType from '../../../../models/TicketType';
 import User from '../../../../models/User';
-
+import { generateTicketTitle } from '@/lib/openai';
 
 // GET: Fetch all tickets
 export async function GET() {
@@ -11,7 +10,6 @@ export async function GET() {
 
   try {
     const tickets = await Ticket.find()
-      .populate('ticketType', 'name')
       .sort({ createdAt: -1 });
 
     return NextResponse.json(tickets, { status: 200 });
@@ -28,11 +26,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('Request body:', body);
 
-    // Validate and resolve ticketType
-    const ticketType = await TicketType.findOne({ name: body.ticketType });
-    if (!ticketType) {
-      return NextResponse.json({ message: `Invalid ticketType: ${body.ticketType}` }, { status: 400 });
-    }
+    // Generate title from description
+    const generatedTitle = await generateTicketTitle(body.description);
 
     // Validate and resolve createdBy
     const user = await User.findOne({ _id: body.createdBy });
@@ -40,16 +35,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: `Invalid createdBy: ${body.createdBy}` }, { status: 400 });
     }
 
-    // Create the ticket with resolved ObjectIds
-    const ticket = await Ticket.create({
-      ...body,
-      ticketType: ticketType._id,
+    // Create a new ticket document with the correct types
+    const ticketData = {
+      title: generatedTitle,
+      description: body.description,
+      ticketType: body.ticketType,
+      status: body.status || 'active',
       createdBy: user._id,
-    });
+      relatedTickets: body.relatedTickets || []
+    };
+
+    // Create the ticket
+    const ticket = await Ticket.create(ticketData);
 
     console.log('Ticket created:', ticket);
     return NextResponse.json(ticket, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ message: 'Failed to create ticket', error }, { status: 500 });
+    console.error('Error creating ticket:', error);
+    return NextResponse.json({ 
+      message: 'Failed to create ticket', 
+      error: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }

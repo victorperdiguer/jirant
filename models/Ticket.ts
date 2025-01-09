@@ -6,7 +6,7 @@ interface ITicket extends Document {
   status: 'active' | 'deleted';
   createdBy: Types.ObjectId;
   relatedTickets: Types.ObjectId[];
-  ticketType: Types.ObjectId; // Reference to TicketType
+  ticketType: string;
   createdAt: Date;
 }
 
@@ -16,8 +16,11 @@ const TicketSchema = new Schema<ITicket>({
   status: { type: String, default: 'active', enum: ['active', 'deleted'] },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   relatedTickets: [{ type: Schema.Types.ObjectId, ref: 'Ticket' }],
-  ticketType: { type: Schema.Types.ObjectId, ref: 'TicketType', required: true }, // Link to TicketType
+  ticketType: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.models.Ticket || mongoose.model<ITicket>('Ticket', TicketSchema);
+// Clear the model if it exists to ensure schema changes are applied
+mongoose.models = {};
+
+export default mongoose.model<ITicket>('Ticket', TicketSchema);

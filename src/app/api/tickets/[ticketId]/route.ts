@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import {connectToDatabase} from '../../../../../lib/mongodb';
 import Ticket from '../../../../../models/Ticket';
-import TicketType from '../../../../../models/TicketType';
 import User from '../../../../../models/User';
-
 
 // Connect to the database
 await connectToDatabase();
@@ -11,7 +9,8 @@ await connectToDatabase();
 // GET: Fetch a specific ticket by ID
 export async function GET(request: Request, { params }: { params: { ticketId: string } }) {
   try {
-    const ticket = await Ticket.findById(params.ticketId).populate('ticketType').populate('relatedTickets');
+    // No need to populate ticketType
+    const ticket = await Ticket.findById(params.ticketId).populate('relatedTickets');
     if (!ticket) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
     }
@@ -27,15 +26,6 @@ export async function PATCH(request: Request, { params }: { params: { ticketId: 
   try {
     const body = await request.json();
 
-    // Validate and resolve ticketType if updated
-    let ticketType = null;
-    if (body.ticketType) {
-      ticketType = await TicketType.findOne({ name: body.ticketType });
-      if (!ticketType) {
-        return NextResponse.json({ error: `Invalid ticketType: ${body.ticketType}` }, { status: 400 });
-      }
-    }
-
     // Validate and resolve createdBy if updated
     let user = null;
     if (body.createdBy) {
@@ -48,7 +38,6 @@ export async function PATCH(request: Request, { params }: { params: { ticketId: 
     // Update the ticket
     const updatedFields = {
       ...body,
-      ...(ticketType && { ticketType: ticketType._id }),
       ...(user && { createdBy: user._id }),
     };
 
