@@ -105,7 +105,8 @@ export function WorkspaceMain() {
           ticketType: selectedTemplate?.name,
           status: 'active',
           createdBy: '6773d9d5e742a5daaac149d1',
-          relatedTickets: []
+          relatedTickets: [],
+          userInput: userMessage,
         }),
       });
 

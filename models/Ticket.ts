@@ -8,6 +8,7 @@ interface ITicket extends Document {
   relatedTickets: Types.ObjectId[];
   ticketType: string;
   createdAt: Date;
+  userInput?: string;
 }
 
 const TicketSchema = new Schema<ITicket>({
@@ -18,6 +19,7 @@ const TicketSchema = new Schema<ITicket>({
   relatedTickets: [{ type: Schema.Types.ObjectId, ref: 'Ticket' }],
   ticketType: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
+  userInput: { type: String, required: false },
 });
 
 // Check if the model exists before creating a new one
