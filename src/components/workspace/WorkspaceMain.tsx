@@ -9,6 +9,7 @@ import { ITicketType } from "@/types/ticket-types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { LoadingMessage } from "./LoadingMessage";
+import { useSidebar } from "@/context/SidebarContext";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -23,6 +24,7 @@ export function WorkspaceMain() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const { refreshSidebar } = useSidebar();
   
   useAutoResize(textareaRef);
 
@@ -111,6 +113,9 @@ export function WorkspaceMain() {
         console.error('Failed to create ticket:', errorText);
         throw new Error(`Failed to create ticket: ${errorText}`);
       }
+
+      // Refresh the sidebar after successful ticket creation
+      refreshSidebar();
 
     } catch (error) {
       console.error('Error processing request:', error);

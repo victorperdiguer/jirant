@@ -32,7 +32,7 @@ export function Sidebar() {
   const [tickets, setTickets] = useState<GroupedTickets>({});
   const [isLoading, setIsLoading] = useState(true);
   const [allTickets, setAllTickets] = useState<Ticket[]>([]);
-  const { searchQuery, setSearchQuery } = useSidebar();
+  const { searchQuery, setSearchQuery, lastRefresh } = useSidebar();
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -56,7 +56,7 @@ export function Sidebar() {
     };
 
     fetchTickets();
-  }, []);
+  }, [lastRefresh]);
 
   // Update grouped tickets when search query changes
   useEffect(() => {

@@ -4,26 +4,36 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 interface SidebarContextType {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  refreshSidebar: () => void;
+  lastRefresh: number;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
   const [searchQuery, setSearchQuery] = useState(() => {
-    // Try to get the saved search query from localStorage during initialization
     if (typeof window !== 'undefined') {
       return localStorage.getItem('sidebarSearchQuery') || '';
     }
     return '';
   });
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
 
-  // Save search query to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('sidebarSearchQuery', searchQuery);
   }, [searchQuery]);
 
+  const refreshSidebar = () => {
+    setLastRefresh(Date.now());
+  };
+
   return (
-    <SidebarContext.Provider value={{ searchQuery, setSearchQuery }}>
+    <SidebarContext.Provider value={{ 
+      searchQuery, 
+      setSearchQuery, 
+      refreshSidebar,
+      lastRefresh 
+    }}>
       {children}
     </SidebarContext.Provider>
   );
