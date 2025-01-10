@@ -59,4 +59,12 @@ export default {
   	}
   },
   plugins: [require("tailwindcss-animate")],
+  safelist: [
+    'text-green-500',
+    'text-purple-500',
+    'text-blue-500',
+    'text-orange-500',
+    'text-pink-500',
+    'text-red-500',
+  ],
 } satisfies Config;

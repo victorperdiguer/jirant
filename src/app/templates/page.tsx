@@ -2,19 +2,13 @@
 import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bug, FileText, Zap, Lightbulb, Check, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { ITicketType } from '@/types/ticket-types';
 import { TemplateEditDialog } from "@/components/templates/TemplateEditDialog";
 import Link from "next/link";
 import { Sidebar } from "@/components/workspace/Sidebar";
-
-const iconMap = {
-  'task': Check,
-  'user-story': FileText,
-  'bug': Bug,
-  'epic': Lightbulb,
-  'spike': Zap,
-};
+import { defaultTicketTypes } from "@/config/ticketTypeIcons";
+import { cn } from "@/lib/utils";
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<ITicketType[]>([]);
@@ -27,6 +21,7 @@ export default function TemplatesPage() {
         const response = await fetch('/api/ticket-types');
         if (!response.ok) throw new Error('Failed to fetch templates');
         const data = await response.json();
+        console.log(data);
         setTemplates(data);
       } catch (error) {
         console.error('Error fetching templates:', error);
@@ -38,10 +33,12 @@ export default function TemplatesPage() {
     fetchTemplates();
   }, []);
 
-  const getIcon = (templateName: string) => {
-    const key = templateName.toLowerCase().replace(/\s+/g, '-') as keyof typeof iconMap;
-    const Icon = iconMap[key] || Check;
-    return <Icon className="h-6 w-6 text-muted-foreground" />;
+  const getIcon = (template: ITicketType) => {
+    const iconConfig = defaultTicketTypes[template.icon];
+    if (!iconConfig) return null;
+    
+    const Icon = iconConfig.icon;
+    return <Icon className={cn("h-6 w-6", template.color)} />;
   };
 
   const handleSaveTemplate = async (editedTemplate: ITicketType) => {
@@ -91,7 +88,7 @@ export default function TemplatesPage() {
                 >
                   <CardHeader>
                     <div className="flex items-center gap-3 mb-2">
-                      {getIcon(template.name)}
+                      {getIcon(template)}
                       <CardTitle>{template.name}</CardTitle>
                     </div>
                     <CardDescription>
