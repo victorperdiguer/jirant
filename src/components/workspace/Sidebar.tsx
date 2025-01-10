@@ -19,6 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 
 interface Ticket {
   _id: string;
@@ -43,6 +44,7 @@ const iconMap = {
 };
 
 export function Sidebar() {
+  const { toast } = useToast();
   const [tickets, setTickets] = useState<GroupedTickets>({});
   const [isLoading, setIsLoading] = useState(true);
   const [allTickets, setAllTickets] = useState<Ticket[]>([]);
@@ -139,7 +141,7 @@ export function Sidebar() {
   };
 
   const handleDeleteTicket = async (ticketId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent ticket click event from firing
+    e.stopPropagation();
     
     try {
       const response = await fetch(`/api/tickets/${ticketId}`, {
@@ -156,11 +158,18 @@ export function Sidebar() {
         throw new Error('Failed to delete ticket');
       }
 
-      // Refresh the sidebar to remove the deleted ticket
       refreshSidebar();
+      toast({
+        title: "Ticket deleted",
+        description: "The ticket has been successfully deleted.",
+      });
     } catch (error) {
       console.error('Error deleting ticket:', error);
-      // You might want to add a toast notification here
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete ticket. Please try again.",
+      });
     }
   };
 
