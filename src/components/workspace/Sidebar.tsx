@@ -12,6 +12,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { Message } from "@/types/message";
 
 interface Ticket {
   _id: string;
@@ -19,6 +20,8 @@ interface Ticket {
   ticketType: string;
   createdAt: string;
   status: string;
+  description: string;
+  userInput?: string;
 }
 
 interface GroupedTickets {
@@ -103,6 +106,32 @@ export function Sidebar() {
     return <Icon className="h-4 w-4" />;
   };
 
+  const handleTicketClick = (ticket: Ticket) => {
+    // If ticket has userInput, show it as a user message first
+    const messages: Message[] = [];
+    if (ticket.userInput) {
+      messages.push({
+        role: 'user',
+        content: ticket.userInput
+      });
+    }
+    
+    // Then show the AI-generated description
+    messages.push({
+      role: 'assistant',
+      content: ticket.description
+    });
+
+    // Emit an event to notify WorkspaceMain
+    const event = new CustomEvent('displayTicket', {
+      detail: {
+        messages,
+        ticketType: ticket.ticketType
+      }
+    });
+    window.dispatchEvent(event);
+  };
+
   return (
     <div className="w-64 border-r bg-muted/50 h-screen flex flex-col">
       <div className="p-6">
@@ -156,6 +185,7 @@ export function Sidebar() {
                         "px-2 py-2 hover:bg-accent hover:text-accent-foreground",
                         "cursor-pointer"
                       )}
+                      onClick={() => handleTicketClick(ticket)}
                     >
                       {getIcon(ticket.ticketType)}
                       <HoverCard openDelay={200}>

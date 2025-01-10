@@ -10,6 +10,7 @@ export async function GET() {
 
   try {
     const tickets = await Ticket.find()
+      .select('_id title description ticketType status createdAt userInput')
       .sort({ createdAt: -1 });
 
     return NextResponse.json(tickets, { status: 200 });

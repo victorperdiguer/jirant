@@ -11,11 +11,7 @@ import { cn } from "@/lib/utils";
 import { LoadingMessage } from "./LoadingMessage";
 import { useSidebar } from "@/context/SidebarContext";
 import { FormattedMessage } from "./FormattedMessage";
-
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-}
+import { Message } from "@/types/message";
 
 export function WorkspaceMain() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -131,6 +127,35 @@ export function WorkspaceMain() {
       setIsProcessing(false);
     }
   };
+
+  // Add event listener for ticket display
+  useEffect(() => {
+    const handleDisplayTicket = (event: CustomEvent<{
+      messages: Message[];
+      ticketType: string;
+    }>) => {
+      // Find the ticket type ID from the name
+      const ticketType = ticketTypes.find(t => t.name === event.detail.ticketType);
+      if (ticketType) {
+        setSelectedType(ticketType._id);
+      }
+      
+      // Set the messages
+      setMessages(event.detail.messages);
+      
+      // Clear the input and processing state
+      setInput('');
+      setIsProcessing(false);
+    };
+
+    // Add event listener
+    window.addEventListener('displayTicket', handleDisplayTicket as EventListener);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('displayTicket', handleDisplayTicket as EventListener);
+    };
+  }, [ticketTypes]); // Add ticketTypes as dependency
 
   return (
     <div className="flex-1 flex flex-col h-full">
