@@ -12,6 +12,8 @@ export interface ITicketType {
   description?: string;
   details?: string;
   templateStructure?: ITemplateSection[];
+  icon: string;
+  color: string;
   createdBy: Types.ObjectId | null;
 }
 

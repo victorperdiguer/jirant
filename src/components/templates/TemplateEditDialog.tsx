@@ -12,6 +12,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Trash2, Plus, GripVertical } from "lucide-react";
 import { useState } from "react";
 import { ITicketType, ITemplateSection } from "@/types/ticket-types";
+import { availableIcons } from "@/config/ticketTypeIcons";
+import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
 
 interface TemplateEditDialogProps {
   template: ITicketType;
@@ -23,6 +26,8 @@ interface TemplateEditDialogProps {
 export function TemplateEditDialog({ template, isOpen, onClose, onSave }: TemplateEditDialogProps) {
   const [editedTemplate, setEditedTemplate] = useState<ITicketType>({...template});
   const [previewContent, setPreviewContent] = useState("");
+  const [selectedIcon, setSelectedIcon] = useState(template?.icon || 'task');
+  const [selectedColor, setSelectedColor] = useState(template?.color || 'text-blue-500');
 
   const handleSectionChange = (index: number, field: keyof ITemplateSection, value: string) => {
     const newSections = [...(editedTemplate.templateStructure || [])];
@@ -53,7 +58,13 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave }: Templa
   };
 
   const handleSave = async () => {
-    await onSave(editedTemplate);
+    const updatedTemplate = {
+      ...editedTemplate,
+      icon: selectedIcon,
+      color: selectedColor
+    };
+    
+    await onSave(updatedTemplate);
     onClose();
   };
 
@@ -146,6 +157,30 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave }: Templa
                         />
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Icon & Color</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {availableIcons.map((iconConfig) => {
+                      const Icon = iconConfig.icon;
+                      return (
+                        <Button
+                          key={iconConfig.id}
+                          type="button"
+                          variant={selectedIcon === iconConfig.id ? "default" : "outline"}
+                          className="flex items-center gap-2"
+                          onClick={() => {
+                            setSelectedIcon(iconConfig.id);
+                            setSelectedColor(iconConfig.color);
+                          }}
+                        >
+                          <Icon className={cn("h-4 w-4", iconConfig.color)} />
+                          <span className="text-sm">{iconConfig.label}</span>
+                        </Button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search, Trash2, CheckCircle2 } from "lucide-react";
+import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search, Trash2, CheckCircle2, CheckSquare } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { defaultTicketTypes } from "@/config/ticketTypeIcons";
 
 interface Ticket {
   _id: string;
@@ -35,14 +36,6 @@ interface Ticket {
 interface GroupedTickets {
   [key: string]: Ticket[];
 }
-
-const iconMap = {
-  'task': FileText,
-  'user-story': FileText,
-  'bug': Bug,
-  'epic': Lightbulb,
-  'spike': Zap,
-};
 
 export function Sidebar() {
   const { toast } = useToast();
@@ -111,9 +104,12 @@ export function Sidebar() {
   };
 
   const getIcon = (ticketType: string) => {
-    const key = ticketType.toLowerCase().replace(/\s+/g, '-') as keyof typeof iconMap;
-    const Icon = iconMap[key] || FileText;
-    return <Icon className="h-4 w-4" />;
+    const type = ticketType.toLowerCase().replace(/\s+/g, '-');
+    const iconConfig = defaultTicketTypes[type];
+    if (!iconConfig) return <CheckSquare className="h-4 w-4" />;
+    
+    const Icon = iconConfig.icon;
+    return <Icon className={cn("h-4 w-4", iconConfig.color)} />;
   };
 
   const handleTicketClick = (ticket: Ticket) => {

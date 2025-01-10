@@ -16,9 +16,9 @@ export async function PUT(
     const { _id, ...updateFields } = updateData;
 
     // Validate required fields
-    if (!updateFields.name) {
+    if (!updateFields.name || !updateFields.icon || !updateFields.color) {
       return NextResponse.json(
-        { message: 'Name is required' },
+        { message: 'Name, icon, and color are required' },
         { status: 400 }
       );
     }
@@ -28,8 +28,8 @@ export async function PUT(
       typeId,
       { $set: updateFields },
       { 
-        new: true, // Return the updated document
-        runValidators: true // Run schema validators
+        new: true,
+        runValidators: true
       }
     );
 
@@ -101,6 +101,44 @@ export async function DELETE(
   } catch (error) {
     return NextResponse.json(
       { message: "Couldn't delete ticket type", error },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: { typeId: string } }
+) {
+  try {
+    await connectToDatabase();
+    const body = await request.json();
+
+    const updatedType = await TicketType.findByIdAndUpdate(
+      params.typeId,
+      {
+        name: body.name,
+        description: body.description,
+        details: body.details,
+        templateStructure: body.templateStructure,
+        icon: body.icon,
+        color: body.color,
+      },
+      { new: true }
+    );
+
+    if (!updatedType) {
+      return NextResponse.json(
+        { error: 'Template not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(updatedType);
+  } catch (error) {
+    console.error('Error updating ticket type:', error);
+    return NextResponse.json(
+      { error: 'Failed to update template' },
       { status: 500 }
     );
   }
