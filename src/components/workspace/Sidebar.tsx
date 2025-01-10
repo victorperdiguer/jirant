@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search, Trash2 } from "lucide-react";
+import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search, Trash2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -49,6 +49,7 @@ export function Sidebar() {
   const [tickets, setTickets] = useState<GroupedTickets>({});
   const [isLoading, setIsLoading] = useState(true);
   const [allTickets, setAllTickets] = useState<Ticket[]>([]);
+  const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
   const { searchQuery, setSearchQuery, lastRefresh, refreshSidebar } = useSidebar();
 
   useEffect(() => {
@@ -186,7 +187,12 @@ export function Sidebar() {
               refreshSidebar();
               toast({
                 title: "Action undone",
-                description: "The ticket has been restored.",
+                description: (
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span>The ticket has been restored.</span>
+                  </div>
+                ),
               });
             } catch (error) {
               toast({
@@ -261,7 +267,8 @@ export function Sidebar() {
                       className={cn(
                         "group flex items-center gap-2 w-full rounded-md",
                         "px-2 py-2 hover:bg-accent hover:text-accent-foreground",
-                        "cursor-pointer"
+                        "cursor-pointer",
+                        activeTicketId === ticket._id && "bg-accent text-accent-foreground shadow-sm"
                       )}
                       onClick={() => handleTicketClick(ticket)}
                     >
@@ -274,13 +281,21 @@ export function Sidebar() {
                         </HoverCardTrigger>
                         <HoverCardContent 
                           side="right" 
-                          align="start" 
+                          align="start"
+                          alignOffset={-8}
+                          sideOffset={32}
                           className="w-[300px] p-2"
                         >
                           <p className="text-sm font-medium">{ticket.title}</p>
                         </HoverCardContent>
                       </HoverCard>
-                      <DropdownMenu>
+                      <DropdownMenu onOpenChange={(open) => {
+                        if (open) {
+                          setActiveTicketId(ticket._id);
+                        } else {
+                          setActiveTicketId(null);
+                        }
+                      }}>
                         <DropdownMenuTrigger asChild>
                           <Button
                             size="icon"
