@@ -24,32 +24,31 @@ export async function GET(request: Request, { params }: { params: { ticketId: st
 // PATCH: Update a specific ticket by ID
 export async function PATCH(request: Request, { params }: { params: { ticketId: string } }) {
   try {
+    await connectToDatabase();
+
     const body = await request.json();
+    const { ticketId } = params;
 
-    // Validate and resolve createdBy if updated
-    let user = null;
-    if (body.createdBy) {
-      user = await User.findOne({ _id: body.createdBy });
-      if (!user) {
-        return NextResponse.json({ error: `Invalid createdBy: ${body.createdBy}` }, { status: 400 });
-      }
-    }
+    const ticket = await Ticket.findByIdAndUpdate(
+      ticketId,
+      { status: body.status },
+      { new: true }
+    );
 
-    // Update the ticket
-    const updatedFields = {
-      ...body,
-      ...(user && { createdBy: user._id }),
-    };
-
-    const ticket = await Ticket.findByIdAndUpdate(params.ticketId, updatedFields, { new: true });
     if (!ticket) {
-      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Ticket not found' },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json(ticket, { status: 200 });
+    return NextResponse.json(ticket);
   } catch (error) {
     console.error('Error updating ticket:', error);
-    return NextResponse.json({ message: 'Failed to update ticket', error }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to update ticket' },
+      { status: 500 }
+    );
   }
 }
 

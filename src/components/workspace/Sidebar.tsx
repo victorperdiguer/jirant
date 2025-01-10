@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search } from "lucide-react";
+import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,12 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Message } from "@/types/message";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Ticket {
   _id: string;
@@ -40,7 +46,7 @@ export function Sidebar() {
   const [tickets, setTickets] = useState<GroupedTickets>({});
   const [isLoading, setIsLoading] = useState(true);
   const [allTickets, setAllTickets] = useState<Ticket[]>([]);
-  const { searchQuery, setSearchQuery, lastRefresh } = useSidebar();
+  const { searchQuery, setSearchQuery, lastRefresh, refreshSidebar } = useSidebar();
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -132,6 +138,32 @@ export function Sidebar() {
     window.dispatchEvent(event);
   };
 
+  const handleDeleteTicket = async (ticketId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent ticket click event from firing
+    
+    try {
+      const response = await fetch(`/api/tickets/${ticketId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'deleted'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete ticket');
+      }
+
+      // Refresh the sidebar to remove the deleted ticket
+      refreshSidebar();
+    } catch (error) {
+      console.error('Error deleting ticket:', error);
+      // You might want to add a toast notification here
+    }
+  };
+
   return (
     <div className="w-64 border-r bg-muted/50 h-screen flex flex-col">
       <div className="p-6">
@@ -202,13 +234,27 @@ export function Sidebar() {
                           <p className="text-sm font-medium">{ticket.title}</p>
                         </HoverCardContent>
                       </HoverCard>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100"
-                      >
-                        <MoreVertical className="h-3 w-3" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100"
+                            onClick={(e) => e.stopPropagation()} // Prevent ticket click when opening menu
+                          >
+                            <MoreVertical className="h-3 w-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-32">
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive cursor-pointer"
+                            onClick={(e) => handleDeleteTicket(ticket._id, e)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Delete</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   ))}
                 </div>
