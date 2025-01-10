@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 interface Ticket {
   _id: string;
@@ -161,7 +162,43 @@ export function Sidebar() {
       refreshSidebar();
       toast({
         title: "Ticket deleted",
-        description: "The ticket has been successfully deleted.",
+        description: (
+          <div className="flex items-center gap-2">
+            <Trash2 className="h-4 w-4 text-destructive" />
+            <span>The ticket has been deleted.</span>
+          </div>
+        ),
+        action: (
+          <ToastAction altText="Undo" onClick={async () => {
+            try {
+              const undoResponse = await fetch(`/api/tickets/${ticketId}`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  status: 'active'
+                }),
+              });
+
+              if (!undoResponse.ok) throw new Error('Failed to undo');
+              
+              refreshSidebar();
+              toast({
+                title: "Action undone",
+                description: "The ticket has been restored.",
+              });
+            } catch (error) {
+              toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to restore ticket.",
+              });
+            }
+          }}>
+            Undo
+          </ToastAction>
+        ),
       });
     } catch (error) {
       console.error('Error deleting ticket:', error);
