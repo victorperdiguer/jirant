@@ -24,18 +24,35 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Validate required fields
-    if (!body.name || !body.icon || !body.color) {
+    if (!body.name || !body.icon || !body.color || !body.details) {
       return NextResponse.json(
-        { error: 'Name, icon, and color are required' },
+        { error: 'Name, icon, color, and details are required' },
         { status: 400 }
       );
+    }
+
+    // Validate template structure
+    if (!Array.isArray(body.templateStructure)) {
+      return NextResponse.json(
+        { error: 'Template structure must be an array' },
+        { status: 400 }
+      );
+    }
+
+    for (const section of body.templateStructure) {
+      if (!section.sectionTitle || typeof section.content !== 'string') {
+        return NextResponse.json(
+          { error: 'Each template section must have a sectionTitle and content' },
+          { status: 400 }
+        );
+      }
     }
 
     const ticketType = await TicketType.create({
       name: body.name,
       description: body.description || '',
-      details: body.details || '',
-      templateStructure: body.templateStructure || [],
+      details: body.details,
+      templateStructure: body.templateStructure,
       icon: body.icon,
       color: body.color,
       createdBy: body.createdBy || null,

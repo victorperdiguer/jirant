@@ -17,11 +17,28 @@ export async function PUT(
     const { _id, ...updateFields } = updateData;
 
     // Validate required fields
-    if (!updateFields.name || !updateFields.icon || !updateFields.color) {
+    if (!updateFields.name || !updateFields.icon || !updateFields.color || !updateFields.details) {
       return NextResponse.json(
-        { message: 'Name, icon, and color are required' },
+        { message: 'Name, icon, color, and details are required' },
         { status: 400 }
       );
+    }
+
+    // Validate template structure
+    if (!Array.isArray(updateFields.templateStructure)) {
+      return NextResponse.json(
+        { message: 'Template structure must be an array' },
+        { status: 400 }
+      );
+    }
+
+    for (const section of updateFields.templateStructure) {
+      if (!section.sectionTitle || typeof section.content !== 'string') {
+        return NextResponse.json(
+          { message: 'Each template section must have a sectionTitle and content' },
+          { status: 400 }
+        );
+      }
     }
 
     // Find and update the ticket type

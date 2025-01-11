@@ -43,7 +43,7 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave }: Templa
       ...editedTemplate,
       templateStructure: [
         ...(editedTemplate.templateStructure || []),
-        { sectionTitle: "New Section", fieldTitle: "", content: "" }
+        { sectionTitle: "New Section", content: "" }
       ]
     });
   };
@@ -144,15 +144,10 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave }: Templa
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                        <Input
-                          value={section.fieldTitle}
-                          onChange={(e) => handleSectionChange(index, 'fieldTitle', e.target.value)}
-                          placeholder="Field Title"
-                        />
                         <Textarea
                           value={section.content || ''}
                           onChange={(e) => handleSectionChange(index, 'content', e.target.value)}
-                          placeholder="Default content or placeholder"
+                          placeholder="Default content or instructions"
                           className="h-20"
                         />
                       </div>
@@ -197,7 +192,6 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave }: Templa
                   {editedTemplate.templateStructure?.map((section, index) => (
                     <div key={index} className="mb-4">
                       <h4 className="font-medium mb-2">{section.sectionTitle}</h4>
-                      <p className="text-sm text-muted-foreground mb-1">{section.fieldTitle}</p>
                       <p className="text-sm">{section.content || 'Content will appear here...'}</p>
                     </div>
                   ))}

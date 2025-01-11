@@ -64,15 +64,14 @@ export default function TemplatesPage() {
 
   const handleCreateTemplate = () => {
     const newTemplate: ITicketType = {
-      _id: '', // This will be assigned by MongoDB
+      _id: '',
       name: 'New Template',
       description: 'New template description',
       details: 'Describe how specific you want the tickets to be',
       templateStructure: [
         {
           sectionTitle: 'Description',
-          fieldTitle: 'What needs to be done?',
-          content: ''
+          content: 'Describe what needs to be done'
         }
       ],
       icon: 'task',
