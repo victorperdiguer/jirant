@@ -157,6 +157,26 @@ export function WorkspaceMain() {
     };
   }, [ticketTypes]); // Add ticketTypes as dependency
 
+  useEffect(() => {
+    // Check for pending ticket display
+    const pendingTicket = sessionStorage.getItem('pendingTicketDisplay');
+    if (pendingTicket) {
+      const { messages, ticketType } = JSON.parse(pendingTicket);
+      
+      // Find the ticket type and set it
+      const ticketTypeObj = ticketTypes.find(t => t.name === ticketType);
+      if (ticketTypeObj) {
+        setSelectedType(ticketTypeObj._id);
+      }
+      
+      // Set the messages
+      setMessages(messages);
+      
+      // Clear the pending ticket
+      sessionStorage.removeItem('pendingTicketDisplay');
+    }
+  }, [ticketTypes]); // Add ticketTypes as dependency
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Header Section */}

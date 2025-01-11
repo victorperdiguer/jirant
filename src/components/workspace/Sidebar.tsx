@@ -22,6 +22,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { defaultTicketTypes } from "@/config/ticketTypeIcons";
+import { useRouter } from "next/navigation";
 
 interface Ticket {
   _id: string;
@@ -44,6 +45,7 @@ export function Sidebar() {
   const [allTickets, setAllTickets] = useState<Ticket[]>([]);
   const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
   const { searchQuery, setSearchQuery, lastRefresh, refreshSidebar } = useSidebar();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -113,7 +115,33 @@ export function Sidebar() {
   };
 
   const handleTicketClick = (ticket: Ticket) => {
-    // If ticket has userInput, show it as a user message first
+    // If we're not in the workspace page, navigate to it
+    if (window.location.pathname !== '/workspace') {
+      // Create the messages before navigation
+      const messages: Message[] = [];
+      if (ticket.userInput) {
+        messages.push({
+          role: 'user',
+          content: ticket.userInput
+        });
+      }
+      messages.push({
+        role: 'assistant',
+        content: ticket.description
+      });
+
+      // Store the messages and ticket type in sessionStorage
+      sessionStorage.setItem('pendingTicketDisplay', JSON.stringify({
+        messages,
+        ticketType: ticket.ticketType
+      }));
+
+      // Navigate to workspace
+      router.push('/workspace');
+      return;
+    }
+
+    // If already in workspace, just display the ticket
     const messages: Message[] = [];
     if (ticket.userInput) {
       messages.push({
@@ -121,14 +149,11 @@ export function Sidebar() {
         content: ticket.userInput
       });
     }
-    
-    // Then show the AI-generated description
     messages.push({
       role: 'assistant',
       content: ticket.description
     });
 
-    // Emit an event to notify WorkspaceMain
     const event = new CustomEvent('displayTicket', {
       detail: {
         messages,
