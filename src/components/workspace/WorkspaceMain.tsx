@@ -178,6 +178,25 @@ export function WorkspaceMain() {
     }
   }, [ticketTypes]); // Add ticketTypes as dependency
 
+  // Add this new effect to handle workspace clearing
+  useEffect(() => {
+    const handleClearWorkspace = () => {
+      setMessages([]);
+      setInput('');
+      setIsProcessing(false);
+      // Reset to first template if available
+      if (ticketTypes.length > 0) {
+        setSelectedType(ticketTypes[0]._id);
+      }
+    };
+
+    window.addEventListener('clearWorkspace', handleClearWorkspace);
+
+    return () => {
+      window.removeEventListener('clearWorkspace', handleClearWorkspace);
+    };
+  }, [ticketTypes]);
+
   const getIcon = (template: ITicketType) => {
     const iconConfig = defaultTicketTypes[template.icon];
     if (!iconConfig) return null;

@@ -237,6 +237,20 @@ export function Sidebar() {
     }
   };
 
+  const handleNewTicket = () => {
+    // Clear any pending ticket from sessionStorage
+    sessionStorage.removeItem('pendingTicketDisplay');
+    
+    // If we're already in workspace, dispatch a clear event
+    if (window.location.pathname === '/workspace') {
+      const event = new CustomEvent('clearWorkspace');
+      window.dispatchEvent(event);
+    } else {
+      // Navigate to workspace
+      router.push('/workspace');
+    }
+  };
+
   return (
     <div className="w-64 border-r bg-muted/50 h-screen flex flex-col">
       <div className="p-6">
@@ -245,7 +259,11 @@ export function Sidebar() {
             <img src="/logo.svg" alt="Jira'nt" className="h-6" />
             <span className="font-semibold">Jira'nt</span>
           </Link>
-          <Button size="icon" variant="ghost">
+          <Button 
+            size="icon" 
+            variant="ghost"
+            onClick={handleNewTicket}
+          >
             <Plus className="h-4 w-4" />
           </Button>
         </div>
