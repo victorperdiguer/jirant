@@ -105,12 +105,10 @@ export default function TemplatesPage() {
                 className="hover:border-primary cursor-pointer transition-colors border-dashed"
                 onClick={handleCreateTemplate}
               >
-                <CardHeader>
-                  <div className="flex items-center justify-center h-[120px]">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      <Plus className="h-8 w-8" />
-                      <span className="text-sm font-medium">Create New Template</span>
-                    </div>
+                <CardHeader className="min-h-[105px] flex flex-col justify-center">
+                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <Plus className="h-8 w-8" />
+                    <span className="text-sm font-medium">Create New Template</span>
                   </div>
                 </CardHeader>
               </Card>
@@ -121,12 +119,12 @@ export default function TemplatesPage() {
                   className="hover:border-primary cursor-pointer transition-colors"
                   onClick={() => setSelectedTemplate(template)}
                 >
-                  <CardHeader>
-                    <div className="flex items-center gap-3 mb-2">
+                  <CardHeader className="min-h-[105px] flex flex-col justify-between">
+                    <div className="flex items-center gap-3">
                       {getIcon(template)}
                       <CardTitle>{template.name}</CardTitle>
                     </div>
-                    <CardDescription>
+                    <CardDescription className="line-clamp-2">
                       {template.description || 'No description provided'}
                     </CardDescription>
                   </CardHeader>
