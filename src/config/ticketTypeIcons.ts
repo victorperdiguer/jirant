@@ -5,7 +5,11 @@ import {
   Palette, 
   LineChart, 
   Bug,
-  LucideIcon 
+  LucideIcon,
+  FileText,
+  Zap,
+  Flag,
+  ShieldCheck,
 } from "lucide-react";
 
 export interface TicketTypeIcon {
@@ -44,6 +48,26 @@ export const defaultTicketTypes: { [key: string]: TicketTypeIcon } = {
     icon: Bug,
     label: 'Bug',
     color: 'text-red-500'
+  },
+  'feature': {
+    icon: Zap,
+    label: 'Feature',
+    color: 'text-purple-500'
+  },
+  'initiative': {
+    icon: Flag,
+    label: 'Initiative',
+    color: 'text-orange-500'
+  },
+  'security': {
+    icon: ShieldCheck,
+    label: 'Security',
+    color: 'text-yellow-500'
+  },
+  'documentation': {
+    icon: FileText,
+    label: 'Documentation',
+    color: 'text-blue-500'
   }
 };
 

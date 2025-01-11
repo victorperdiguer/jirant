@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Trash2, Plus, GripVertical, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Trash2, Plus, GripVertical, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import { useState } from "react";
 import { ITicketType, ITemplateSection } from "@/types/ticket-types";
 import { availableIcons } from "@/config/ticketTypeIcons";
@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 interface TemplateEditDialogProps {
   template: ITicketType;
@@ -168,7 +169,7 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave, onDelete
             {/* Left Panel - Template Editor */}
             <div className="flex-1 border-r overflow-hidden flex flex-col">
               <ScrollArea className="flex-1 p-6">
-                <div className="space-y-6 pr-4">
+                <div className="space-y-6 pr-4 pl-1">
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium mb-1 block">Nombre</label>
@@ -246,7 +247,7 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave, onDelete
 
                   <div className="space-y-2">
                     <Label>Icon</Label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-5 gap-2">
                       {availableIcons.map((iconConfig) => {
                         const Icon = iconConfig.icon;
                         return (
@@ -261,7 +262,6 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave, onDelete
                             }}
                           >
                             <Icon className={cn("h-4 w-4", iconConfig.color)} />
-                            <span className="text-sm">{iconConfig.label}</span>
                           </Button>
                         );
                       })}
@@ -269,7 +269,19 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave, onDelete
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Priority Tier</Label>
+                    <div className="flex items-center gap-2">
+                      <Label>Hierarchy Tier</Label>
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-[200px] p-2">
+                          <p className="text-sm text-muted-foreground">
+                            Tier 1 is highest hierarchy, Tier 5 is lowest. This determines which tickets "belong" to which other tickets after linking them.
+                          </p>
+                        </HoverCardContent>
+                      </HoverCard>
+                    </div>
                     <RadioGroup
                       value={selectedTier.toString()}
                       onValueChange={(value) => setSelectedTier(parseInt(value))}
@@ -291,9 +303,6 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave, onDelete
                         </div>
                       ))}
                     </RadioGroup>
-                    <p className="text-sm text-muted-foreground">
-                      Tier 1 is highest priority, Tier 5 is lowest priority
-                    </p>
                   </div>
                 </div>
               </ScrollArea>
