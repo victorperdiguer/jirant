@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { ITicketType } from '@/types/ticket-types';
 import { TemplateEditDialog } from "@/components/templates/TemplateEditDialog";
 import Link from "next/link";
@@ -62,6 +62,27 @@ export default function TemplatesPage() {
     }
   };
 
+  const handleCreateTemplate = () => {
+    const newTemplate: ITicketType = {
+      _id: '', // This will be assigned by MongoDB
+      name: 'New Template',
+      description: 'New template description',
+      details: 'Describe how specific you want the tickets to be',
+      templateStructure: [
+        {
+          sectionTitle: 'Description',
+          fieldTitle: 'What needs to be done?',
+          content: ''
+        }
+      ],
+      icon: 'task',
+      color: 'text-blue-500',
+      createdBy: null
+    };
+    
+    setSelectedTemplate(newTemplate);
+  };
+
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
@@ -80,6 +101,20 @@ export default function TemplatesPage() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card 
+                className="hover:border-primary cursor-pointer transition-colors border-dashed"
+                onClick={handleCreateTemplate}
+              >
+                <CardHeader>
+                  <div className="flex items-center justify-center h-[120px]">
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                      <Plus className="h-8 w-8" />
+                      <span className="text-sm font-medium">Create New Template</span>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+
               {templates.map((template) => (
                 <Card 
                   key={template._id}
@@ -106,7 +141,29 @@ export default function TemplatesPage() {
             template={selectedTemplate}
             isOpen={!!selectedTemplate}
             onClose={() => setSelectedTemplate(null)}
-            onSave={handleSaveTemplate}
+            onSave={async (editedTemplate) => {
+              try {
+                // If it's a new template (no _id)
+                if (!editedTemplate._id) {
+                  const response = await fetch('/api/ticket-types', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(editedTemplate),
+                  });
+
+                  if (!response.ok) throw new Error('Failed to create template');
+                  const newTemplate = await response.json();
+                  setTemplates([...templates, newTemplate]);
+                } else {
+                  // Existing template update logic
+                  await handleSaveTemplate(editedTemplate);
+                }
+              } catch (error) {
+                console.error('Error saving template:', error);
+              }
+            }}
           />
         )}
       </div>

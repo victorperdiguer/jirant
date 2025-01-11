@@ -9,7 +9,8 @@ export async function PUT(
   await connectToDatabase();
 
   try {
-    const { typeId } = params;
+    const awaitParams = await params;
+    const typeId = awaitParams.typeId;
     const updateData = await request.json();
 
     // Remove _id from update data if it exists
@@ -58,7 +59,8 @@ export async function GET(
   await connectToDatabase();
 
   try {
-    const { typeId } = params;
+    const awaitParams = await params;
+    const typeId = awaitParams.typeId;
     const ticketType = await TicketType.findById(typeId);
 
     if (!ticketType) {
@@ -84,7 +86,8 @@ export async function DELETE(
   await connectToDatabase();
 
   try {
-    const { typeId } = params;
+    const awaitParams = await params;
+    const typeId = awaitParams.typeId;
     const deletedTicketType = await TicketType.findByIdAndDelete(typeId);
 
     if (!deletedTicketType) {
@@ -106,7 +109,7 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(
+/* export async function PATCH(
   request: Request,
   { params }: { params: { typeId: string } }
 ) {
@@ -142,4 +145,4 @@ export async function PATCH(
       { status: 500 }
     );
   }
-} 
+}  */
