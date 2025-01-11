@@ -103,6 +103,48 @@ export default function TemplatesPage() {
     setSelectedTemplate(newTemplate);
   };
 
+  const handleDeleteTemplate = async (template: ITicketType) => {
+    try {
+      const response = await fetch(`/api/ticket-types/${template._id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to delete template');
+
+      // Update local state
+      setTemplates(templates.filter(t => t._id !== template._id));
+      setSelectedTemplate(null);
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete template. Please try again.",
+      });
+    }
+  };
+
+  const handleRestoreTemplate = async (template: ITicketType) => {
+    try {
+      const { _id, ...templateWithoutId } = template;
+      const response = await fetch('/api/ticket-types', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(templateWithoutId),
+      });
+
+      if (!response.ok) throw new Error('Failed to restore template');
+      const restoredTemplate = await response.json();
+      
+      // Update local state
+      setTemplates([...templates, restoredTemplate]);
+    } catch (error) {
+      throw error; // Let the TemplateEditDialog handle the error
+    }
+  };
+
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
@@ -159,51 +201,9 @@ export default function TemplatesPage() {
             template={selectedTemplate}
             isOpen={!!selectedTemplate}
             onClose={() => setSelectedTemplate(null)}
-            onSave={async (editedTemplate) => {
-              try {
-                // If it's a new template (no _id)
-                if (!editedTemplate._id) {
-                  const response = await fetch('/api/ticket-types', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(editedTemplate),
-                  });
-
-                  if (!response.ok) throw new Error('Failed to create template');
-                  const newTemplate = await response.json();
-                  setTemplates([...templates, newTemplate]);
-
-                  // Show success toast for creation
-                  toast({
-                    title: "Template created",
-                    description: (
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        <span>
-                          Template <span className="font-bold">{newTemplate.name}</span> has been created successfully.
-                        </span>
-                      </div>
-                    ),
-                  });
-                } else {
-                  // Existing template update logic
-                  await handleSaveTemplate(editedTemplate);
-                }
-              } catch (error) {
-                console.error('Error saving template:', error);
-                toast({
-                  variant: "destructive",
-                  title: "Error",
-                  description: (
-                    <span>
-                      Failed to {editedTemplate._id ? 'update' : 'create'} template <span className="font-bold">{editedTemplate.name}</span>. Please try again.
-                    </span>
-                  ),
-                });
-              }
-            }}
+            onSave={handleSaveTemplate}
+            onDelete={handleDeleteTemplate}
+            onRestore={handleRestoreTemplate}
           />
         )}
       </div>
