@@ -159,7 +159,7 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave }: Templa
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Icon & Color</Label>
+                  <Label>Icon</Label>
                   <div className="grid grid-cols-3 gap-2">
                     {availableIcons.map((iconConfig) => {
                       const Icon = iconConfig.icon;

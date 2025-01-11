@@ -12,7 +12,6 @@ export interface ITicketType extends Document {
   templateStructure: ITemplateSection[];
   icon: string;
   color: string;
-  tier: number;
   createdBy: mongoose.Types.ObjectId | null;
 }
 
@@ -28,7 +27,6 @@ const TicketTypeSchema = new Schema<ITicketType>({
   templateStructure: [TemplateSectionSchema],
   icon: { type: String, required: true },
   color: { type: String, required: true },
-  tier: { type: Number, required: true, default: 3, min: 1, max: 5 },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
 });
 
