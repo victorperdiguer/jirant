@@ -12,6 +12,7 @@ import { LoadingMessage } from "./LoadingMessage";
 import { useSidebar } from "@/context/SidebarContext";
 import { FormattedMessage } from "./FormattedMessage";
 import { Message } from "@/types/message";
+import { defaultTicketTypes } from "@/config/ticketTypeIcons";
 
 export function WorkspaceMain() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -177,6 +178,14 @@ export function WorkspaceMain() {
     }
   }, [ticketTypes]); // Add ticketTypes as dependency
 
+  const getIcon = (template: ITicketType) => {
+    const iconConfig = defaultTicketTypes[template.icon];
+    if (!iconConfig) return null;
+    
+    const Icon = iconConfig.icon;
+    return <Icon className={cn("h-4 w-4", template.color)} />;
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Header Section */}
@@ -193,13 +202,21 @@ export function WorkspaceMain() {
               >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder={isLoading ? "Loading..." : "Select template"}>
-                    {selectedType && ticketTypes.find(t => t._id === selectedType)?.name}
+                    {selectedType && (
+                      <div className="flex items-center gap-2">
+                        {getIcon(ticketTypes.find(t => t._id === selectedType)!)}
+                        <span>{ticketTypes.find(t => t._id === selectedType)?.name}</span>
+                      </div>
+                    )}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {ticketTypes.map((type) => (
                     <SelectItem key={type._id} value={type._id}>
-                      {type.name}
+                      <div className="flex items-center gap-2">
+                        {getIcon(type)}
+                        <span>{type.name}</span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
