@@ -2,15 +2,17 @@
 import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, CheckCircle2 } from "lucide-react";
 import { ITicketType } from '@/types/ticket-types';
 import { TemplateEditDialog } from "@/components/templates/TemplateEditDialog";
 import Link from "next/link";
 import { Sidebar } from "@/components/workspace/Sidebar";
 import { defaultTicketTypes } from "@/config/ticketTypeIcons";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function TemplatesPage() {
+  const { toast } = useToast();
   const [templates, setTemplates] = useState<ITicketType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState<ITicketType | null>(null);
@@ -57,8 +59,26 @@ export default function TemplatesPage() {
       setTemplates(templates.map(t => 
         t._id === editedTemplate._id ? editedTemplate : t
       ));
+
+      // Show success toast
+      toast({
+        title: "Template updated",
+        description: (
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <span>
+              Template <span className="font-bold">{editedTemplate.name}</span> has been updated successfully.
+            </span>
+          </div>
+        ),
+      });
     } catch (error) {
       console.error('Error updating template:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update template. Please try again.",
+      });
     }
   };
 
@@ -153,12 +173,34 @@ export default function TemplatesPage() {
                   if (!response.ok) throw new Error('Failed to create template');
                   const newTemplate = await response.json();
                   setTemplates([...templates, newTemplate]);
+
+                  // Show success toast for creation
+                  toast({
+                    title: "Template created",
+                    description: (
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <span>
+                          Template <span className="font-bold">{newTemplate.name}</span> has been created successfully.
+                        </span>
+                      </div>
+                    ),
+                  });
                 } else {
                   // Existing template update logic
                   await handleSaveTemplate(editedTemplate);
                 }
               } catch (error) {
                 console.error('Error saving template:', error);
+                toast({
+                  variant: "destructive",
+                  title: "Error",
+                  description: (
+                    <span>
+                      Failed to {editedTemplate._id ? 'update' : 'create'} template <span className="font-bold">{editedTemplate.name}</span>. Please try again.
+                    </span>
+                  ),
+                });
               }
             }}
           />
