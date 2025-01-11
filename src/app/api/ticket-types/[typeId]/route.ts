@@ -24,14 +24,17 @@ export async function PUT(
       );
     }
 
-    // Validate tier if provided
-    if (updateFields.tier !== undefined && 
-        (!Number.isInteger(updateFields.tier) || updateFields.tier < 1 || updateFields.tier > 5)) {
+    // Validate tier
+    const tier = parseInt(updateFields.tier);
+    if (isNaN(tier) || tier < 1 || tier > 5) {
       return NextResponse.json(
-        { message: 'Tier must be an integer between 1 and 5' },
+        { message: 'Tier must be a number between 1 and 5' },
         { status: 400 }
       );
     }
+
+    // Ensure tier is a number in the update fields
+    updateFields.tier = tier;
 
     // Validate template structure
     if (!Array.isArray(updateFields.templateStructure)) {
@@ -51,6 +54,7 @@ export async function PUT(
     }
 
     // Find and update the ticket type
+    console.log(updateFields);
     const updatedTicketType = await TicketType.findByIdAndUpdate(
       typeId,
       { $set: updateFields },

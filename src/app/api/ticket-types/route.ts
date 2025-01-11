@@ -6,8 +6,9 @@ export async function GET() {
   try {
     await connectToDatabase();
     const ticketTypes = await TicketType.find()
-      .select('_id name description details templateStructure icon color')
+      .select('_id name description details templateStructure icon color tier')
       .sort({ name: 1 });
+    console.log(ticketTypes);
     return NextResponse.json(ticketTypes);
   } catch (error) {
     console.error('Error fetching ticket types:', error);
@@ -31,10 +32,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate tier if provided
-    if (body.tier && (!Number.isInteger(body.tier) || body.tier < 1 || body.tier > 5)) {
+    // Validate tier
+    const tier = body.tier ? parseInt(body.tier) : 3; // Default to 3 if not provided
+    if (tier < 1 || tier > 5) {
       return NextResponse.json(
-        { error: 'Tier must be an integer between 1 and 5' },
+        { error: 'Tier must be a number between 1 and 5' },
         { status: 400 }
       );
     }
@@ -63,7 +65,7 @@ export async function POST(request: NextRequest) {
       templateStructure: body.templateStructure,
       icon: body.icon,
       color: body.color,
-      tier: body.tier || 3, // Default to tier 3 if not specified
+      tier: tier,
       createdBy: body.createdBy || null,
     });
 

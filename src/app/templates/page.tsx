@@ -23,8 +23,20 @@ export default function TemplatesPage() {
         const response = await fetch('/api/ticket-types');
         if (!response.ok) throw new Error('Failed to fetch templates');
         const data = await response.json();
-        console.log(data);
-        setTemplates(data);
+        console.log("data",data);
+        
+        // Sort templates by tier (ascending) and then alphabetically
+        const sortedTemplates = data.sort((a: ITicketType, b: ITicketType) => {
+          // First sort by tier (ascending)
+          if (a.tier !== b.tier) {
+            return a.tier - b.tier;
+          }
+          // If same tier, sort alphabetically
+          return a.name.localeCompare(b.name);
+        });
+        
+        setTemplates(sortedTemplates);
+        console.log(sortedTemplates);
       } catch (error) {
         console.error('Error fetching templates:', error);
       } finally {
@@ -45,39 +57,85 @@ export default function TemplatesPage() {
 
   const handleSaveTemplate = async (editedTemplate: ITicketType) => {
     try {
-      const response = await fetch(`/api/ticket-types/${editedTemplate._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(editedTemplate),
-      });
+      // If it's a new template (no _id)
+      if (!editedTemplate._id) {
+        const response = await fetch('/api/ticket-types', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...editedTemplate,
+            tier: editedTemplate.tier || 3, // Ensure tier is set
+          }),
+        });
 
-      if (!response.ok) throw new Error('Failed to update template');
+        if (!response.ok) throw new Error('Failed to create template');
+        const newTemplate = await response.json();
+        
+        // Sort templates when adding new one
+        const sortedTemplates = [...templates, newTemplate].sort((a, b) => {
+          if (a.tier !== b.tier) {
+            return a.tier - b.tier;
+          }
+          return a.name.localeCompare(b.name);
+        });
+        
+        setTemplates(sortedTemplates);
 
-      // Update local state
-      setTemplates(templates.map(t => 
-        t._id === editedTemplate._id ? editedTemplate : t
-      ));
+        toast({
+          title: "Template created",
+          description: (
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              <span>
+                Template <span className="font-bold">{newTemplate.name}</span> has been created successfully.
+              </span>
+            </div>
+          ),
+        });
+      } else {
+        // Existing template update logic
+        const response = await fetch(`/api/ticket-types/${editedTemplate._id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editedTemplate),
+        });
 
-      // Show success toast
-      toast({
-        title: "Template updated",
-        description: (
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
-            <span>
-              Template <span className="font-bold">{editedTemplate.name}</span> has been updated successfully.
-            </span>
-          </div>
-        ),
-      });
+        if (!response.ok) throw new Error('Failed to update template');
+
+        // Sort templates after updating
+        const updatedTemplates = templates.map(t => 
+          t._id === editedTemplate._id ? editedTemplate : t
+        ).sort((a, b) => {
+          if (a.tier !== b.tier) {
+            return a.tier - b.tier;
+          }
+          return a.name.localeCompare(b.name);
+        });
+
+        setTemplates(updatedTemplates);
+
+        toast({
+          title: "Template updated",
+          description: (
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              <span>
+                Template <span className="font-bold">{editedTemplate.name}</span> has been updated successfully.
+              </span>
+            </div>
+          ),
+        });
+      }
     } catch (error) {
-      console.error('Error updating template:', error);
+      console.error('Error saving template:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update template. Please try again.",
+        description: "Failed to save template. Please try again.",
       });
     }
   };
