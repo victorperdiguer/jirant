@@ -13,6 +13,7 @@ export interface ITicketType {
   templateStructure: ITemplateSection[];
   icon: string;
   color: string;
+  tier: number;
   createdBy: Types.ObjectId | null;
 }
 

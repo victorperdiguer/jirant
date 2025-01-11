@@ -24,6 +24,15 @@ export async function PUT(
       );
     }
 
+    // Validate tier if provided
+    if (updateFields.tier !== undefined && 
+        (!Number.isInteger(updateFields.tier) || updateFields.tier < 1 || updateFields.tier > 5)) {
+      return NextResponse.json(
+        { message: 'Tier must be an integer between 1 and 5' },
+        { status: 400 }
+      );
+    }
+
     // Validate template structure
     if (!Array.isArray(updateFields.templateStructure)) {
       return NextResponse.json(

@@ -31,6 +31,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate tier if provided
+    if (body.tier && (!Number.isInteger(body.tier) || body.tier < 1 || body.tier > 5)) {
+      return NextResponse.json(
+        { error: 'Tier must be an integer between 1 and 5' },
+        { status: 400 }
+      );
+    }
+
     // Validate template structure
     if (!Array.isArray(body.templateStructure)) {
       return NextResponse.json(
@@ -55,6 +63,7 @@ export async function POST(request: NextRequest) {
       templateStructure: body.templateStructure,
       icon: body.icon,
       color: body.color,
+      tier: body.tier || 3, // Default to tier 3 if not specified
       createdBy: body.createdBy || null,
     });
 

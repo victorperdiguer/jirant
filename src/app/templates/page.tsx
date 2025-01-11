@@ -96,6 +96,7 @@ export default function TemplatesPage() {
       ],
       icon: 'task',
       color: 'text-blue-500',
+      tier: 3,
       createdBy: null
     };
     

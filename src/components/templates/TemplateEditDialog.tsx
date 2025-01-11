@@ -15,6 +15,7 @@ import { ITicketType, ITemplateSection } from "@/types/ticket-types";
 import { availableIcons } from "@/config/ticketTypeIcons";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface TemplateEditDialogProps {
   template: ITicketType;
@@ -28,6 +29,7 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave }: Templa
   const [previewContent, setPreviewContent] = useState("");
   const [selectedIcon, setSelectedIcon] = useState(template?.icon || 'task');
   const [selectedColor, setSelectedColor] = useState(template?.color || 'text-blue-500');
+  const [selectedTier, setSelectedTier] = useState(template?.tier || 3);
 
   const handleSectionChange = (index: number, field: keyof ITemplateSection, value: string) => {
     const newSections = [...(editedTemplate.templateStructure || [])];
@@ -61,7 +63,8 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave }: Templa
     const updatedTemplate = {
       ...editedTemplate,
       icon: selectedIcon,
-      color: selectedColor
+      color: selectedColor,
+      tier: selectedTier
     };
     
     await onSave(updatedTemplate);
@@ -177,6 +180,34 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave }: Templa
                       );
                     })}
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Priority Tier</Label>
+                  <RadioGroup
+                    value={selectedTier.toString()}
+                    onValueChange={(value) => setSelectedTier(parseInt(value))}
+                    className="grid grid-cols-5 gap-2"
+                  >
+                    {[1, 2, 3, 4, 5].map((tier) => (
+                      <div key={tier} className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value={tier.toString()}
+                          id={`tier-${tier}`}
+                          className="peer"
+                        />
+                        <Label
+                          htmlFor={`tier-${tier}`}
+                          className="peer-data-[state=checked]:text-primary"
+                        >
+                          Tier {tier}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                  <p className="text-sm text-muted-foreground">
+                    Tier 1 is highest priority, Tier 5 is lowest priority
+                  </p>
                 </div>
               </div>
             </ScrollArea>
