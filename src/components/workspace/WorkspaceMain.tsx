@@ -259,6 +259,10 @@ export function WorkspaceMain() {
     });
   };
 
+  const truncateTitle = (title: string, maxLength: number = 85) => {
+    return title.length > maxLength ? `${title.substring(0, maxLength)}...` : title;
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Header Section */}
@@ -321,7 +325,9 @@ export function WorkspaceMain() {
                 className="flex items-center gap-1"
               >
                 {getIcon(ticket.ticketType)}
-                <span className="truncate max-w-[200px]">{ticket.title}</span>
+                <span className="truncate max-w-[200px]">
+                  {truncateTitle(ticket.title)}
+                </span>
                 <Button
                   size="icon"
                   variant="ghost"
@@ -373,7 +379,9 @@ export function WorkspaceMain() {
                       className="flex items-center gap-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
                     >
                       {getIcon(ticket.ticketType)}
-                      <span className="truncate">{ticket.title}</span>
+                      <span className="truncate">
+                        {truncateTitle(ticket.title)}
+                      </span>
                     </label>
                   </div>
                 ))}
