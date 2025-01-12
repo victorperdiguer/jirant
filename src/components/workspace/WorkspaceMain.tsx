@@ -1,8 +1,9 @@
 'use client'
-import { Mic, Send } from "lucide-react";
+import { Mic, Send, X, LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { useRef, useState, useEffect } from 'react';
 import { useAutoResize } from '@/hooks/useAutoResize';
 import { ITicketType } from "@/types/ticket-types";
@@ -13,6 +14,19 @@ import { useSidebar } from "@/context/SidebarContext";
 import { FormattedMessage } from "./FormattedMessage";
 import { Message } from "@/types/message";
 import { defaultTicketTypes } from "@/config/ticketTypeIcons";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+
+interface Ticket {
+  _id: string;
+  title: string;
+  ticketType: string;
+  createdAt: string;
+  status: string;
+  description: string;
+  userInput?: string;
+}
 
 export function WorkspaceMain() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -23,6 +37,9 @@ export function WorkspaceMain() {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const { refreshSidebar } = useSidebar();
+  const [selectedTickets, setSelectedTickets] = useState<Ticket[]>([]);
+  const [isTicketDialogOpen, setIsTicketDialogOpen] = useState(false);
+  const [availableTickets, setAvailableTickets] = useState<Ticket[]>([]);
   
   useAutoResize(textareaRef);
 
@@ -44,6 +61,21 @@ export function WorkspaceMain() {
     };
 
     fetchTicketTypes();
+  }, []);
+
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const response = await fetch('/api/tickets');
+        if (!response.ok) throw new Error('Failed to fetch tickets');
+        const data = await response.json();
+        setAvailableTickets(data.filter((t: Ticket) => t.status !== 'deleted'));
+      } catch (error) {
+        console.error('Error fetching tickets:', error);
+      }
+    };
+
+    fetchTickets();
   }, []);
 
   const handleTypeChange = (typeId: string) => {
@@ -197,12 +229,34 @@ export function WorkspaceMain() {
     };
   }, [ticketTypes]);
 
-  const getIcon = (template: ITicketType) => {
-    const iconConfig = defaultTicketTypes[template.icon];
+  const getIcon = (ticketTypeOrName: ITicketType | string) => {
+    let iconKey: string;
+    let iconConfig;
+
+    if (typeof ticketTypeOrName === 'string') {
+      // If it's a string (ticket.ticketType), use it directly as the key
+      iconKey = ticketTypeOrName.toLowerCase().replace(/\s+/g, '-');
+      iconConfig = defaultTicketTypes[iconKey];
+    } else {
+      // If it's an ITicketType object, use its icon property
+      iconConfig = defaultTicketTypes[ticketTypeOrName.icon];
+    }
+
     if (!iconConfig) return null;
     
     const Icon = iconConfig.icon;
-    return <Icon className={cn("h-4 w-4", template.color)} />;
+    return <Icon className={cn("h-4 w-4", iconConfig.color)} />;
+  };
+
+  const toggleTicketSelection = (ticket: Ticket) => {
+    setSelectedTickets(prev => {
+      const isSelected = prev.some(t => t._id === ticket._id);
+      if (isSelected) {
+        return prev.filter(t => t._id !== ticket._id);
+      } else {
+        return [...prev, ticket];
+      }
+    });
   };
 
   return (
@@ -211,7 +265,18 @@ export function WorkspaceMain() {
       <div className="p-8 border-b">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Workspace</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-3xl font-bold">Workspace</h1>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setIsTicketDialogOpen(true)}
+              >
+                <LinkIcon className="h-4 w-4" />
+                Link Tickets
+              </Button>
+            </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-muted-foreground">Plantilla:</span>
               <Select
@@ -244,6 +309,92 @@ export function WorkspaceMain() {
           </div>
         </div>
       </div>
+
+      {/* Selected Tickets Display */}
+      {selectedTickets.length > 0 && (
+        <div className="border-b bg-muted/50 p-2">
+          <div className="max-w-6xl mx-auto flex flex-wrap gap-2">
+            {selectedTickets.map((ticket) => (
+              <Badge
+                key={ticket._id}
+                variant="secondary"
+                className="flex items-center gap-1"
+              >
+                {getIcon(ticket.ticketType)}
+                <span className="truncate max-w-[200px]">{ticket.title}</span>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-4 w-4 p-0 hover:bg-transparent"
+                  onClick={() => toggleTicketSelection(ticket)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Ticket Selection Dialog */}
+      <Dialog open={isTicketDialogOpen} onOpenChange={setIsTicketDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Link Related Tickets</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Search tickets..."
+              className="w-full"
+              onChange={(e) => {
+                // Add ticket search logic here
+              }}
+            />
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-2">
+                {availableTickets.map((ticket) => (
+                  <div
+                    key={ticket._id}
+                    className="flex items-center space-x-2 p-2 hover:bg-muted rounded-lg"
+                  >
+                    <Checkbox
+                      id={ticket._id}
+                      checked={selectedTickets.some(t => t._id === ticket._id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          toggleTicketSelection(ticket);
+                        } else {
+                          toggleTicketSelection(ticket);
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor={ticket._id}
+                      className="flex items-center gap-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                    >
+                      {getIcon(ticket.ticketType)}
+                      <span className="truncate">{ticket.title}</span>
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsTicketDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => setIsTicketDialogOpen(false)}
+              >
+                Done
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Chat Messages Area */}
       <ScrollArea className="flex-1 p-4">
