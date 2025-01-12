@@ -416,12 +416,27 @@ export function Sidebar() {
             <DialogTitle>Link Tickets</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {/* Show selected ticket info */}
+            {linkableTicketId && (
+              <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                <div className="flex items-center gap-2 font-medium">
+                  <span className="font-large">
+                  {getIcon(allTickets.find(t => t._id === linkableTicketId)?.ticketType || '')}
+                  </span>
+                  <span className="font-small">
+                    {allTickets.find(t => t._id === linkableTicketId)?.title}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Rest of the dialog content */}
             <Select
               value={selectedTicketId}
               onValueChange={setSelectedTicketId}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a ticket" />
+                <SelectValue placeholder="Select a ticket to link" />
               </SelectTrigger>
               <SelectContent>
                 {allTickets
@@ -441,7 +456,7 @@ export function Sidebar() {
               </SelectContent>
             </Select>
             <Input
-              placeholder="Relationship type"
+              placeholder="Relationship type, e.g. 'is implemented by'"
               value={relationshipType}
               onChange={(e) => setRelationshipType(e.target.value)}
             />
