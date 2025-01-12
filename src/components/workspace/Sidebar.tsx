@@ -424,11 +424,20 @@ export function Sidebar() {
                 <SelectValue placeholder="Select a ticket" />
               </SelectTrigger>
               <SelectContent>
-                {allTickets.map((ticket) => (
-                  <SelectItem key={ticket._id} value={ticket._id}>
-                    {ticket.title}
-                  </SelectItem>
-                ))}
+                {allTickets
+                  .filter(ticket => ticket._id !== linkableTicketId) // Exclude current ticket
+                  .map((ticket) => (
+                    <SelectItem 
+                      key={ticket._id} 
+                      value={ticket._id}
+                      className="flex items-center gap-2"
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        {getIcon(ticket.ticketType)}
+                        <span className="truncate">{ticket.title}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
             <Input
