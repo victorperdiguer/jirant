@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search, Trash2, CheckCircle2, CheckSquare } from "lucide-react";
+import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search, Trash2, CheckCircle2, CheckSquare, LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { defaultTicketTypes } from "@/config/ticketTypeIcons";
 import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Ticket {
   _id: string;
@@ -46,6 +48,10 @@ export function Sidebar() {
   const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
   const { searchQuery, setSearchQuery, lastRefresh, refreshSidebar } = useSidebar();
   const router = useRouter();
+  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | undefined>(undefined);
+  const [relationshipType, setRelationshipType] = useState<string>('');
+  const [linkableTicketId, setLinkableTicketId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -251,6 +257,39 @@ export function Sidebar() {
     }
   };
 
+  const handleLinkTickets = async (ticketId: string) => {
+    try {
+      const response = await fetch('/api/ticket-relationships', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ticket1: linkableTicketId,
+          ticket2: ticketId,
+          relationshipType,
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to link tickets');
+      
+
+      toast({
+        title: "Tickets linked",
+        description: "The tickets have been linked successfully.",
+      });
+    } catch (error) {
+      console.error('Error linking tickets:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to link tickets. Please try again.",
+      });
+    } finally {
+      setIsLinkDialogOpen(false);
+      
+    }
+  };
+
   return (
     <div className="w-64 border-r bg-muted/50 h-screen flex flex-col">
       <div className="p-6">
@@ -331,6 +370,7 @@ export function Sidebar() {
                       <DropdownMenu onOpenChange={(open) => {
                         if (open) {
                           setActiveTicketId(ticket._id);
+                          setLinkableTicketId(ticket._id);
                         } else {
                           setActiveTicketId(null);
                         }
@@ -346,6 +386,12 @@ export function Sidebar() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-32">
+                          <DropdownMenuItem
+                            onClick={() => setIsLinkDialogOpen(true)}
+                          >
+                            <LinkIcon className="mr-2 h-4 w-4" />
+                            <span>Link</span>
+                          </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive cursor-pointer"
                             onClick={(e) => handleDeleteTicket(ticket._id, e)}
@@ -363,6 +409,42 @@ export function Sidebar() {
           )}
         </div>
       </ScrollArea>
+
+      <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Link Tickets</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Select
+              value={selectedTicketId}
+              onValueChange={setSelectedTicketId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a ticket" />
+              </SelectTrigger>
+              <SelectContent>
+                {allTickets.map((ticket) => (
+                  <SelectItem key={ticket._id} value={ticket._id}>
+                    {ticket.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
+              placeholder="Relationship type"
+              value={relationshipType}
+              onChange={(e) => setRelationshipType(e.target.value)}
+            />
+            <Button
+              onClick={() => selectedTicketId && handleLinkTickets(selectedTicketId)}
+              disabled={!selectedTicketId || !relationshipType}
+            >
+              Link Tickets
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

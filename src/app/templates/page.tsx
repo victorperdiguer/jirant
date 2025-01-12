@@ -23,7 +23,6 @@ export default function TemplatesPage() {
         const response = await fetch('/api/ticket-types');
         if (!response.ok) throw new Error('Failed to fetch templates');
         const data = await response.json();
-        console.log("data",data);
         
         // Sort templates by tier (ascending) and then alphabetically
         const sortedTemplates = data.sort((a: ITicketType, b: ITicketType) => {
@@ -36,7 +35,6 @@ export default function TemplatesPage() {
         });
         
         setTemplates(sortedTemplates);
-        console.log(sortedTemplates);
       } catch (error) {
         console.error('Error fetching templates:', error);
       } finally {

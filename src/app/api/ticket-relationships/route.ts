@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const { ticket1, ticket2, relationshipType } = await request.json();
+    console.log(ticket1, ticket2, relationshipType);
 
     // Validate required fields
     if (!ticket1 || !ticket2) {
