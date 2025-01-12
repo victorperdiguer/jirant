@@ -150,8 +150,15 @@ export function WorkspaceMain() {
         throw new Error(`Failed to create ticket: ${errorText}`);
       }
 
-      // Refresh the sidebar after successful ticket creation
+      // Refresh both sidebar and available tickets
       refreshSidebar();
+      
+      // Fetch updated tickets list
+      const updatedTicketsResponse = await fetch('/api/tickets');
+      if (updatedTicketsResponse.ok) {
+        const data = await updatedTicketsResponse.json();
+        setAvailableTickets(data.filter((t: Ticket) => t.status !== 'deleted'));
+      }
 
     } catch (error) {
       console.error('Error processing request:', error);
