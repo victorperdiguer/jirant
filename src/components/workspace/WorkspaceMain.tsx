@@ -101,7 +101,12 @@ export function WorkspaceMain() {
         },
         body: JSON.stringify({
           templateStructure: selectedTemplate?.templateStructure || [],
-          userInput: userMessage
+          userInput: userMessage,
+          linkedTickets: selectedTickets.map(ticket => ({
+            title: ticket.title,
+            type: ticket.ticketType,
+            description: ticket.description
+          }))
         }),
       });
 
