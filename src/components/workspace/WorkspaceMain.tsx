@@ -384,6 +384,9 @@ export function WorkspaceMain() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Link Related Tickets</DialogTitle>
+            <p className="text-sm text-muted-foreground mt-2">
+              Select one or more tickets to provide context for your new ticket. The AI will consider the information from these tickets when generating the new one.
+            </p>
           </DialogHeader>
           <div className="space-y-4">
             <Input

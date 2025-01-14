@@ -7,7 +7,7 @@ const openai = new OpenAI({
 export async function generateTicketTitle(description: string): Promise<string> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-16k", // Using the cheaper model
+      model: "gpt-4o-mini", // Using the cheaper model
       messages: [
         {
           role: "system",

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       templateStructure, 
       userInput, 
       linkedTickets = [], 
-      model = 'gpt-4',
+      model = 'gpt-4o-mini',
       maxTokens = 500 
     } = await request.json();
 
