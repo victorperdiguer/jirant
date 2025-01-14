@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useAutoResize } from '@/hooks/useAutoResize';
 import { ITicketType } from "@/types/ticket-types";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,6 +17,7 @@ import { defaultTicketTypes } from "@/config/ticketTypeIcons";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AudioWaveform } from './AudioWaveform';
 
 interface Ticket {
   _id: string;
@@ -45,6 +46,9 @@ export function WorkspaceMain() {
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const [recordingStream, setRecordingStream] = useState<MediaStream | null>(null);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   
   useAutoResize(textareaRef);
 
@@ -303,14 +307,16 @@ export function WorkspaceMain() {
     }
   };
 
-  const handleRecording = async () => {
+  const handleRecording = useCallback(async () => {
     if (isRecording) {
-      // Stop recording
       mediaRecorder?.stop();
       setIsRecording(false);
+      setRecordingStream(null);
     } else {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        setRecordingStream(stream);
+        
         const recorder = new MediaRecorder(stream, {
           mimeType: 'audio/webm;codecs=opus'
         });
@@ -324,9 +330,9 @@ export function WorkspaceMain() {
         };
 
         recorder.onstop = async () => {
+          setIsTranscribing(true);
           const audioBlob = new Blob(chunks, { type: 'audio/webm' });
           
-          // Create form data
           const formData = new FormData();
           formData.append('audio', audioBlob, 'recording.webm');
 
@@ -342,16 +348,14 @@ export function WorkspaceMain() {
             setInput(prev => prev + ' ' + data.text);
           } catch (error) {
             console.error('Error transcribing audio:', error);
+          } finally {
+            setIsTranscribing(false);
           }
 
-          // Clear chunks
           chunks = [];
-          
-          // Stop all tracks
           stream.getTracks().forEach(track => track.stop());
         };
 
-        // Request data every second
         recorder.start(1000);
         setMediaRecorder(recorder);
         setIsRecording(true);
@@ -359,7 +363,26 @@ export function WorkspaceMain() {
         console.error('Error accessing microphone:', error);
       }
     }
-  };
+  }, [isRecording, mediaRecorder]);
+
+  useEffect(() => {
+    if (!isRecording) {
+      setRecordingDuration(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setRecordingDuration(prev => {
+        if (prev >= 60) { // Stop after 1 minute
+          handleRecording();
+          return 0;
+        }
+        return prev + 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isRecording]);
 
   return (
     <div className="flex-1 flex flex-col h-full">
@@ -596,19 +619,35 @@ export function WorkspaceMain() {
       {/* Input Section */}
       <div className="flex items-end gap-2 p-4 border-t bg-background">
         <div className="flex-1 flex items-end gap-2">
-          <Textarea
-            ref={textareaRef}
-            placeholder="Type your message..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            className="min-h-[60px] max-h-[200px]"
-          />
+          {isRecording ? (
+            <div className="flex-1 space-y-2">
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Recording... {recordingDuration}s</span>
+              </div>
+              <AudioWaveform stream={recordingStream} />
+              
+            </div>
+          ) : isTranscribing ? (
+            <div className="flex-1 flex items-center justify-center py-4 bg-muted/10 rounded-md">
+              <span className="text-sm text-muted-foreground animate-pulse">
+                Transcribing...
+              </span>
+            </div>
+          ) : (
+            <Textarea
+              ref={textareaRef}
+              placeholder="Type your message..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              className="min-h-[60px] max-h-[200px]"
+            />
+          )}
           <Button
             size="icon"
             variant={isRecording ? "destructive" : "outline"}
@@ -620,7 +659,7 @@ export function WorkspaceMain() {
           <Button
             size="icon"
             onClick={handleSend}
-            disabled={!input.trim() || isProcessing}
+            disabled={!input.trim() || isProcessing || isRecording}
             className="flex-shrink-0"
           >
             <Send className="h-4 w-4" />
