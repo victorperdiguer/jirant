@@ -6,6 +6,8 @@ interface SidebarContextType {
   setSearchQuery: (query: string) => void;
   refreshSidebar: () => void;
   lastRefresh: number;
+  activeTicketId: string | null;
+  setActiveTicketId: (id: string | null) => void;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -18,6 +20,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     return '';
   });
   const [lastRefresh, setLastRefresh] = useState(Date.now());
+  const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem('sidebarSearchQuery', searchQuery);
@@ -32,7 +35,9 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       searchQuery, 
       setSearchQuery, 
       refreshSidebar,
-      lastRefresh 
+      lastRefresh,
+      activeTicketId,
+      setActiveTicketId
     }}>
       {children}
     </SidebarContext.Provider>

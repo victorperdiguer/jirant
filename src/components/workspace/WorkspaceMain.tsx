@@ -36,7 +36,7 @@ export function WorkspaceMain() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const { refreshSidebar } = useSidebar();
+  const { refreshSidebar, setActiveTicketId } = useSidebar();
   const [selectedTickets, setSelectedTickets] = useState<Ticket[]>([]);
   const [isTicketDialogOpen, setIsTicketDialogOpen] = useState(false);
   const [availableTickets, setAvailableTickets] = useState<Ticket[]>([]);
@@ -201,6 +201,7 @@ export function WorkspaceMain() {
       }
       
       setMessages(customEvent.detail.messages);
+      setActiveTicketId(customEvent.detail.ticketId);
       
       if (customEvent.detail.ticketId) {
         await fetchContextTickets(customEvent.detail.ticketId);
@@ -240,7 +241,7 @@ export function WorkspaceMain() {
       setMessages([]);
       setInput('');
       setIsProcessing(false);
-      // Reset to first template if available
+      setActiveTicketId(null);
       if (ticketTypes.length > 0) {
         setSelectedType(ticketTypes[0]._id);
       }

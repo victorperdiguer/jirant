@@ -45,8 +45,7 @@ export function Sidebar() {
   const [tickets, setTickets] = useState<GroupedTickets>({});
   const [isLoading, setIsLoading] = useState(true);
   const [allTickets, setAllTickets] = useState<Ticket[]>([]);
-  const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
-  const { searchQuery, setSearchQuery, lastRefresh, refreshSidebar } = useSidebar();
+  const { searchQuery, setSearchQuery, lastRefresh, refreshSidebar, activeTicketId, setActiveTicketId } = useSidebar();
   const router = useRouter();
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState<string | undefined>(undefined);
