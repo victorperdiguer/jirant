@@ -42,6 +42,9 @@ export function WorkspaceMain() {
   const [availableTickets, setAvailableTickets] = useState<Ticket[]>([]);
   const [isContextExpanded, setIsContextExpanded] = useState(false);
   const [contextTickets, setContextTickets] = useState<Ticket[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   
   useAutoResize(textareaRef);
 
@@ -300,6 +303,64 @@ export function WorkspaceMain() {
     }
   };
 
+  const handleRecording = async () => {
+    if (isRecording) {
+      // Stop recording
+      mediaRecorder?.stop();
+      setIsRecording(false);
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream, {
+          mimeType: 'audio/webm;codecs=opus'
+        });
+        
+        let chunks: Blob[] = [];
+        
+        recorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            chunks.push(e.data);
+          }
+        };
+
+        recorder.onstop = async () => {
+          const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+          
+          // Create form data
+          const formData = new FormData();
+          formData.append('audio', audioBlob, 'recording.webm');
+
+          try {
+            const response = await fetch('/api/transcribe', {
+              method: 'POST',
+              body: formData,
+            });
+
+            if (!response.ok) throw new Error('Transcription failed');
+
+            const data = await response.json();
+            setInput(prev => prev + ' ' + data.text);
+          } catch (error) {
+            console.error('Error transcribing audio:', error);
+          }
+
+          // Clear chunks
+          chunks = [];
+          
+          // Stop all tracks
+          stream.getTracks().forEach(track => track.stop());
+        };
+
+        // Request data every second
+        recorder.start(1000);
+        setMediaRecorder(recorder);
+        setIsRecording(true);
+      } catch (error) {
+        console.error('Error accessing microphone:', error);
+      }
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Header Section */}
@@ -533,46 +594,37 @@ export function WorkspaceMain() {
       </ScrollArea>
 
       {/* Input Section */}
-      <div className="border-t bg-background">
-        <div className="max-w-3xl mx-auto relative p-4">
-          <Textarea 
+      <div className="flex items-end gap-2 p-4 border-t bg-background">
+        <div className="flex-1 flex items-end gap-2">
+          <Textarea
             ref={textareaRef}
+            placeholder="Type your message..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={
-              isLoading 
-                ? "Loading templates..." 
-                : selectedType 
-                  ? ticketTypes.find(t => t._id === selectedType)?.details || "Define un nuevo ticket"
-                  : "Select a template"
-            }
-            className="min-h-[100px] max-h-[33vh] overflow-y-auto pr-24 resize-none"
-            disabled={!selectedType || isProcessing}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleSend();
               }
             }}
+            className="min-h-[60px] max-h-[200px]"
           />
-          <div className="absolute right-6 bottom-6 flex gap-2">
-            <Button
-              size="icon"
-              variant="ghost"
-              className="text-muted-foreground hover:text-foreground"
-              disabled={!selectedType || isProcessing}
-            >
-              <Mic className="h-5 w-5" />
-            </Button>
-            <Button
-              size="icon"
-              variant="default"
-              onClick={handleSend}
-              disabled={!input.trim() || !selectedType || isProcessing}
-            >
-              <Send className="h-5 w-5" />
-            </Button>
-          </div>
+          <Button
+            size="icon"
+            variant={isRecording ? "destructive" : "outline"}
+            onClick={handleRecording}
+            className="flex-shrink-0"
+          >
+            <Mic className={cn("h-4 w-4", isRecording && "animate-pulse")} />
+          </Button>
+          <Button
+            size="icon"
+            onClick={handleSend}
+            disabled={!input.trim() || isProcessing}
+            className="flex-shrink-0"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>
