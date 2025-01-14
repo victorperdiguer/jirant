@@ -465,7 +465,20 @@ export function WorkspaceMain() {
                   <div
                     key={ticket._id}
                     className="flex items-center gap-2 px-2 py-1 hover:bg-muted rounded-md cursor-pointer text-sm"
-                    onClick={() => {/* Add navigation to ticket */}}
+                    onClick={() => {
+                      // Create and dispatch display event
+                      const event = new CustomEvent('displayTicket', {
+                        detail: {
+                          messages: [
+                            { role: 'user', content: ticket.userInput || '' },
+                            { role: 'assistant', content: ticket.description }
+                          ],
+                          ticketType: ticket.ticketType,
+                          ticketId: ticket._id
+                        }
+                      });
+                      window.dispatchEvent(event);
+                    }}
                   >
                     {getIcon(ticket.ticketType)}
                     <span className="text-xs truncate">
