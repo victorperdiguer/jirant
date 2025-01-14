@@ -162,8 +162,12 @@ export function Sidebar() {
 
     const event = new CustomEvent('displayTicket', {
       detail: {
-        messages,
-        ticketType: ticket.ticketType
+        messages: [
+          { role: 'user', content: ticket.userInput || '' },
+          { role: 'assistant', content: ticket.description }
+        ],
+        ticketType: ticket.ticketType,
+        ticketId: ticket._id
       }
     });
     window.dispatchEvent(event);

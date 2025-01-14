@@ -1,5 +1,5 @@
 'use client'
-import { Mic, Send, X, LinkIcon } from "lucide-react";
+import { Mic, Send, X, LinkIcon, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -40,6 +40,8 @@ export function WorkspaceMain() {
   const [selectedTickets, setSelectedTickets] = useState<Ticket[]>([]);
   const [isTicketDialogOpen, setIsTicketDialogOpen] = useState(false);
   const [availableTickets, setAvailableTickets] = useState<Ticket[]>([]);
+  const [isContextExpanded, setIsContextExpanded] = useState(false);
+  const [contextTickets, setContextTickets] = useState<Ticket[]>([]);
   
   useAutoResize(textareaRef);
 
@@ -128,7 +130,7 @@ export function WorkspaceMain() {
       // Add AI response to messages
       setMessages(prev => [...prev, { role: 'assistant', content: aiContent }]);
 
-      // Create ticket with the AI response
+      // Create the ticket first
       const ticketResponse = await fetch('/api/tickets', {
         method: 'POST',
         headers: {
@@ -139,16 +141,27 @@ export function WorkspaceMain() {
           ticketType: selectedTemplate?.name,
           status: 'active',
           createdBy: '6773d9d5e742a5daaac149d1',
-          relatedTickets: [],
           userInput: userMessage,
         }),
       });
 
-      if (!ticketResponse.ok) {
-        const errorText = await ticketResponse.text();
-        console.error('Failed to create ticket:', errorText);
-        throw new Error(`Failed to create ticket: ${errorText}`);
-      }
+      if (!ticketResponse.ok) throw new Error('Failed to create ticket');
+      const newTicket = await ticketResponse.json();
+
+      // Create relationships for each selected context ticket
+      await Promise.all(selectedTickets.map(async (contextTicket) => {
+        await fetch('/api/ticket-relationships', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ticket1: newTicket._id,
+            ticket2: contextTicket._id,
+            relationshipType: 'context',
+          }),
+        });
+      }));
 
       // Refresh both sidebar and available tickets
       refreshSidebar();
@@ -175,32 +188,31 @@ export function WorkspaceMain() {
 
   // Add event listener for ticket display
   useEffect(() => {
-    const handleDisplayTicket = (event: CustomEvent<{
-      messages: Message[];
-      ticketType: string;
-    }>) => {
-      // Find the ticket type ID from the name
-      const ticketType = ticketTypes.find(t => t.name === event.detail.ticketType);
+    const handleDisplayTicket = async (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        messages: Message[];
+        ticketType: string;
+        ticketId: string;
+      }>;
+      
+      const ticketType = ticketTypes.find(t => t.name === customEvent.detail.ticketType);
       if (ticketType) {
         setSelectedType(ticketType._id);
       }
       
-      // Set the messages
-      setMessages(event.detail.messages);
+      setMessages(customEvent.detail.messages);
       
-      // Clear the input and processing state
+      if (customEvent.detail.ticketId) {
+        await fetchContextTickets(customEvent.detail.ticketId);
+      }
+      
       setInput('');
       setIsProcessing(false);
     };
 
-    // Add event listener
-    window.addEventListener('displayTicket', handleDisplayTicket as EventListener);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('displayTicket', handleDisplayTicket as EventListener);
-    };
-  }, [ticketTypes]); // Add ticketTypes as dependency
+    window.addEventListener('displayTicket', handleDisplayTicket);
+    return () => window.removeEventListener('displayTicket', handleDisplayTicket);
+  }, [ticketTypes]);
 
   useEffect(() => {
     // Check for pending ticket display
@@ -275,6 +287,18 @@ export function WorkspaceMain() {
     return title.length > maxLength ? `${title.substring(0, maxLength)}...` : title;
   };
 
+  const fetchContextTickets = async (ticketId: string) => {
+    try {
+      const response = await fetch(`/api/tickets/${ticketId}/context`);
+      if (response.ok) {
+        const data = await response.json();
+        setContextTickets(data);
+      }
+    } catch (error) {
+      console.error('Error fetching context tickets:', error);
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Header Section */}
@@ -290,11 +314,11 @@ export function WorkspaceMain() {
                 onClick={() => setIsTicketDialogOpen(true)}
               >
                 <LinkIcon className="h-4 w-4" />
-                Link Tickets
+                Add Context
               </Button>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">Plantilla:</span>
+              <span className="text-sm text-muted-foreground">Template</span>
               <Select
                 value={selectedType}
                 onValueChange={handleTypeChange}
@@ -415,6 +439,44 @@ export function WorkspaceMain() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Context Collapsible - Show only when viewing an existing ticket */}
+      {contextTickets.length > 0 && (
+        <div className="border-b bg-muted/50">
+          <div className="max-w-3xl mx-auto">
+            <button
+              onClick={() => setIsContextExpanded(!isContextExpanded)}
+              className="flex items-center gap-2 w-full hover:bg-muted/50 px-4 py-1.5 text-muted-foreground"
+            >
+              {isContextExpanded ? (
+                <ChevronDown className="h-3 w-3" />
+              ) : (
+                <ChevronRight className="h-3 w-3" />
+              )}
+              <span className="text-xs font-medium">
+                Context Tickets ({contextTickets.length})
+              </span>
+            </button>
+            
+            {isContextExpanded && (
+              <div className="space-y-1 px-4 py-2">
+                {contextTickets.map((ticket) => (
+                  <div
+                    key={ticket._id}
+                    className="flex items-center gap-2 px-2 py-1 hover:bg-muted rounded-md cursor-pointer text-sm"
+                    onClick={() => {/* Add navigation to ticket */}}
+                  >
+                    {getIcon(ticket.ticketType)}
+                    <span className="text-xs truncate">
+                      {truncateTitle(ticket.title)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Chat Messages Area */}
       <ScrollArea className="flex-1 p-4">
