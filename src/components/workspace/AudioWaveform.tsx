@@ -34,17 +34,17 @@ export function AudioWaveform({ stream }: AudioWaveformProps) {
       ctx.fillStyle = 'rgb(255, 255, 255)';
       ctx.fillRect(0, 0, width, height);
       
-      const barWidth = (width / bufferLength) * 2.5;
+      const barWidth = (width / bufferLength) * 2.5
       let barHeight;
       let x = 0;
       
       for (let i = 0; i < bufferLength; i++) {
         barHeight = dataArray[i] / 5;
         
-        ctx.fillStyle = `rgb(${barHeight + 200}, 0, 0)`;
+        ctx.fillStyle = `rgb(255, 0, 0)`;
         ctx.fillRect(x, height - barHeight, barWidth, barHeight);
         
-        x += barWidth + 1;
+        x += barWidth - 1;
       }
       
       animationRef.current = requestAnimationFrame(draw);
