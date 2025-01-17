@@ -404,7 +404,7 @@ export function WorkspaceMain() {
                 Add Context
               </Button>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 mr-20">
               <span className="text-sm text-muted-foreground">Template</span>
               <Select
                 value={selectedType}

@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search, Trash2, CheckCircle2, CheckSquare, LinkIcon, BookDashed } from "lucide-react";
+import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search, Trash2, CheckCircle2, CheckSquare, LinkIcon, BookDashed, SquarePen } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -308,7 +308,7 @@ export function Sidebar() {
             variant="ghost"
             onClick={handleNewTicket}
           >
-            <Plus className="h-4 w-4" />
+            <SquarePen className="h-4 w-4" />
           </Button>
         </div>
 
