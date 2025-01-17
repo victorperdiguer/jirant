@@ -21,10 +21,10 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "database",
   },
+  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async session({ session, user }) {
       if (session?.user) {
-        // Use the MongoDB _id
         session.user.id = user.id;
       }
       return session;

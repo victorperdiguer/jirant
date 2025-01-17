@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   await connectToDatabase();
 
   try {
-    const tickets = await Ticket.find()
+    const tickets = await Ticket.find({ createdBy: session.user.id })
       .select('_id title description ticketType status createdAt userInput')
       .sort({ createdAt: -1 });
 
