@@ -11,12 +11,15 @@ import { defaultTicketTypes } from "@/config/ticketTypeIcons";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { UserButton } from '@/components/UserButton';
+import { useSession } from 'next-auth/react';
+
 
 export default function TemplatesPage() {
   const { toast } = useToast();
   const [templates, setTemplates] = useState<ITicketType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState<ITicketType | null>(null);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const fetchTemplates = async () => {
@@ -58,15 +61,26 @@ export default function TemplatesPage() {
     try {
       // If it's a new template (no _id)
       if (!editedTemplate._id) {
+        const templateData = {
+          name: editedTemplate.name,
+          description: editedTemplate.description,
+          details: editedTemplate.details,
+          templateStructure: editedTemplate.templateStructure.map(section => ({
+            sectionTitle: section.sectionTitle,
+            content: section.content
+          })),
+          icon: editedTemplate.icon,
+          color: editedTemplate.color,
+          tier: editedTemplate.tier || 3,
+          createdBy: session?.user?.id
+        };
+
         const response = await fetch('/api/ticket-types', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            ...editedTemplate,
-            tier: editedTemplate.tier || 3, // Ensure tier is set
-          }),
+          body: JSON.stringify(templateData),
         });
 
         if (!response.ok) throw new Error('Failed to create template');

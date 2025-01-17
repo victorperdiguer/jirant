@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {connectToDatabase} from '../../../../lib/mongodb';
 import TicketType from '../../../../models/TicketType';
+import User from '../../../../models/User';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     await connectToDatabase();
-    const ticketTypes = await TicketType.find()
+    const ticketTypes = await TicketType.find({ createdBy: session.user.id })
       .select('_id name description details templateStructure icon color tier')
       .sort({ name: 1 });
     console.log(ticketTypes);
@@ -20,6 +27,12 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     await connectToDatabase();
     const body = await request.json();
@@ -32,32 +45,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate tier
-    const tier = body.tier ? parseInt(body.tier) : 3; // Default to 3 if not provided
-    if (tier < 1 || tier > 5) {
-      return NextResponse.json(
-        { error: 'Tier must be a number between 1 and 5' },
-        { status: 400 }
-      );
-    }
-
-    // Validate template structure
-    if (!Array.isArray(body.templateStructure)) {
-      return NextResponse.json(
-        { error: 'Template structure must be an array' },
-        { status: 400 }
-      );
-    }
-
-    for (const section of body.templateStructure) {
-      if (!section.sectionTitle || typeof section.content !== 'string') {
-        return NextResponse.json(
-          { error: 'Each template section must have a sectionTitle and content' },
-          { status: 400 }
-        );
-      }
-    }
-
+    // Create the ticket type with the session user's ID
     const ticketType = await TicketType.create({
       name: body.name,
       description: body.description || '',
@@ -65,15 +53,15 @@ export async function POST(request: NextRequest) {
       templateStructure: body.templateStructure,
       icon: body.icon,
       color: body.color,
-      tier: tier,
-      createdBy: body.createdBy || null,
+      tier: body.tier || 3,
+      createdBy: session.user.id
     });
 
     return NextResponse.json(ticketType, { status: 201 });
   } catch (error) {
     console.error('Error creating ticket type:', error);
     return NextResponse.json(
-      { error: 'Failed to create ticket type' },
+      { error: 'Failed to create ticket type', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
