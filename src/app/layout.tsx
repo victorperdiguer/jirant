@@ -6,6 +6,7 @@ import { SidebarProvider } from '@/context/SidebarContext';
 import { Toaster } from "@/components/ui/toaster";
 import { getServerSession } from 'next-auth';
 import { SessionProvider } from '@/components/providers/SessionProvider';
+import { authOptions } from './api/auth/[...nextauth]/route';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,7 +29,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   return (
     <html lang="en">

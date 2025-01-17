@@ -25,6 +25,7 @@ import { defaultTicketTypes } from "@/config/ticketTypeIcons";
 import { useRouter, usePathname } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSession } from "next-auth/react";
 
 interface Ticket {
   _id: string;
@@ -53,12 +54,27 @@ export function Sidebar() {
   const [linkableTicketId, setLinkableTicketId] = useState<string | null>(null);
   const pathname = usePathname();
   const isTemplatesPage = pathname === '/templates';
+  const { data: session } = useSession();
 
   useEffect(() => {
     const fetchTickets = async () => {
+      if (!session) {
+        setIsLoading(false);
+        setTickets({});
+        setAllTickets([]);
+        return;
+      }
+
       try {
         const response = await fetch('/api/tickets');
-        if (!response.ok) throw new Error('Failed to fetch tickets');
+        if (!response.ok) {
+          if (response.status === 401) {
+            setTickets({});
+            setAllTickets([]);
+            return;
+          }
+          throw new Error('Failed to fetch tickets');
+        }
         const data = await response.json();
 
         // Filter out deleted tickets
@@ -76,7 +92,7 @@ export function Sidebar() {
     };
 
     fetchTickets();
-  }, [lastRefresh]);
+  }, [lastRefresh, session]);
 
   // Update grouped tickets when search query changes
   useEffect(() => {

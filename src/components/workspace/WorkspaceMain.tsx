@@ -76,18 +76,30 @@ export function WorkspaceMain() {
 
   useEffect(() => {
     const fetchTickets = async () => {
+      if (!session) {
+        setAvailableTickets([]);
+        return;
+      }
+
       try {
         const response = await fetch('/api/tickets');
-        if (!response.ok) throw new Error('Failed to fetch tickets');
+        if (!response.ok) {
+          if (response.status === 401) {
+            setAvailableTickets([]);
+            return;
+          }
+          throw new Error('Failed to fetch tickets');
+        }
         const data = await response.json();
         setAvailableTickets(data.filter((t: Ticket) => t.status !== 'deleted'));
       } catch (error) {
         console.error('Error fetching tickets:', error);
+        setAvailableTickets([]);
       }
     };
 
     fetchTickets();
-  }, []);
+  }, [session]);
 
   const handleTypeChange = (typeId: string) => {
     setSelectedType(typeId);
