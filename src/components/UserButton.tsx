@@ -20,9 +20,14 @@ export function UserButton() {
     .join('')
     .toUpperCase() || '';
 
-  const handleNewLogin = () => {
-    signIn('google', {
+  const handleNewLogin = async () => {
+    // Sign out from NextAuth only
+    await signOut({ redirect: false });
+    
+    // Trigger new sign in with forced account selection
+    await signIn('google', {
       prompt: 'select_account',
+      callbackUrl: window.location.pathname,
     });
   };
 
@@ -77,7 +82,7 @@ export function UserButton() {
           ) : (
             <DropdownMenuItem 
               className="cursor-pointer"
-              onClick={() => signIn('google')}
+              onClick={() => signIn('google', { prompt: 'select_account' })}
             >
               <LogIn className="mr-2 h-4 w-4" />
               <span>Sign in</span>
