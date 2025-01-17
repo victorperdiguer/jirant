@@ -10,6 +10,7 @@ import { Sidebar } from "@/components/workspace/Sidebar";
 import { defaultTicketTypes } from "@/config/ticketTypeIcons";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { UserButton } from '@/components/UserButton';
 
 export default function TemplatesPage() {
   const { toast } = useToast();
@@ -202,67 +203,68 @@ export default function TemplatesPage() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      
-      <div className="flex-1 overflow-auto">
-        <div className="p-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <h1 className="text-3xl font-bold">Ticket Templates</h1>
-              <Link href="/workspace">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Workspace
-                </Button>
-              </Link>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card 
-                className="hover:border-primary cursor-pointer transition-colors border-dashed"
-                onClick={handleCreateTemplate}
-              >
-                <CardHeader className="min-h-[105px] flex flex-col justify-center">
-                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <Plus className="h-8 w-8" />
-                    <span className="text-sm font-medium">Create New Template</span>
-                  </div>
-                </CardHeader>
-              </Card>
+        <div className="flex h-screen bg-background">
+          <Sidebar />
+          
+          <div className="flex-1 overflow-auto">
+            <div className="p-8">
+              <div className="max-w-6xl mx-auto">
+                <div className="flex items-center justify-between mb-8">
+                  <h1 className="text-3xl font-bold">Ticket Templates</h1>
+                  <Link href="/workspace">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <ArrowLeft className="h-4 w-4" />
+                      Back to Workspace
+                    </Button>
+                  </Link>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <Card 
+                    className="hover:border-primary cursor-pointer transition-colors border-dashed"
+                    onClick={handleCreateTemplate}
+                  >
+                    <CardHeader className="min-h-[105px] flex flex-col justify-center">
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        <Plus className="h-8 w-8" />
+                        <span className="text-sm font-medium">Create New Template</span>
+                      </div>
+                    </CardHeader>
+                  </Card>
 
-              {templates.map((template) => (
-                <Card 
-                  key={template._id}
-                  className="hover:border-primary cursor-pointer transition-colors"
-                  onClick={() => setSelectedTemplate(template)}
-                >
-                  <CardHeader className="min-h-[105px] flex flex-col justify-between">
-                    <div className="flex items-center gap-3">
-                      {getIcon(template)}
-                      <CardTitle>{template.name}</CardTitle>
-                    </div>
-                    <CardDescription className="line-clamp-2">
-                      {template.description || 'No description provided'}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              ))}
+                  {templates.map((template) => (
+                    <Card 
+                      key={template._id}
+                      className="hover:border-primary cursor-pointer transition-colors"
+                      onClick={() => setSelectedTemplate(template)}
+                    >
+                      <CardHeader className="min-h-[105px] flex flex-col justify-between">
+                        <div className="flex items-center gap-3">
+                          {getIcon(template)}
+                          <CardTitle>{template.name}</CardTitle>
+                        </div>
+                        <CardDescription className="line-clamp-2">
+                          {template.description || 'No description provided'}
+                        </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  ))}
+                </div>
+              </div>
             </div>
+
+            {selectedTemplate && (
+              <TemplateEditDialog
+                template={selectedTemplate}
+                isOpen={!!selectedTemplate}
+                onClose={() => setSelectedTemplate(null)}
+                onSave={handleSaveTemplate}
+                onDelete={handleDeleteTemplate}
+                onRestore={handleRestoreTemplate}
+              />
+            )}
           </div>
-        </div>
-
-        {selectedTemplate && (
-          <TemplateEditDialog
-            template={selectedTemplate}
-            isOpen={!!selectedTemplate}
-            onClose={() => setSelectedTemplate(null)}
-            onSave={handleSaveTemplate}
-            onDelete={handleDeleteTemplate}
-            onRestore={handleRestoreTemplate}
-          />
-        )}
-      </div>
+      <UserButton />
     </div>
   );
 } 

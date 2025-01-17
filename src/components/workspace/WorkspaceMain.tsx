@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AudioWaveform } from './AudioWaveform';
+import { useSession } from 'next-auth/react';
 
 interface Ticket {
   _id: string;
@@ -49,6 +50,7 @@ export function WorkspaceMain() {
   const [recordingStream, setRecordingStream] = useState<MediaStream | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const { data: session } = useSession();
   
   useAutoResize(textareaRef);
 
@@ -147,7 +149,7 @@ export function WorkspaceMain() {
           description: aiContent,
           ticketType: selectedTemplate?.name,
           status: 'active',
-          createdBy: '6773d9d5e742a5daaac149d1',
+          createdBy: session?.user?.id,
           userInput: userMessage,
         }),
       });
