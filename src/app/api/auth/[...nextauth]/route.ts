@@ -1,7 +1,9 @@
-import NextAuth from 'next-auth';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
+import { getMongoClient } from '../../../../../lib/mongodb';
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -15,20 +17,15 @@ export const authOptions = {
       }
     }),
   ],
+  adapter: MongoDBAdapter(getMongoClient()),
   session: {
-    strategy: "jwt",
-    maxAge: 24 * 60 * 60, // 24 hours
+    strategy: "database",
   },
   callbacks: {
-    async signIn({ account, profile }) {
-      if (account?.provider === "google") {
-        return true;
-      }
-      return false;
-    },
-    async session({ session, token }) {
+    async session({ session, user }) {
       if (session?.user) {
-        session.user.id = token.sub;
+        // Use the MongoDB _id
+        session.user.id = user.id;
       }
       return session;
     },
