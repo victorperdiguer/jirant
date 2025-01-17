@@ -32,19 +32,19 @@ export function UserButton() {
   };
 
   return (
-    <div className="absolute top-4 right-4">
+    <div className="absolute top-8 right-8">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="h-8 w-8 rounded-full bg-primary p-0 overflow-hidden"
+            className="h-10 w-10 rounded-full bg-primary p-0 overflow-hidden"
           >
             {session?.user?.image ? (
               <Image
                 src={session.user.image}
                 alt={session.user.name || 'User avatar'}
-                width={32}
-                height={32}
+                width={40}
+                height={40}
                 className="h-full w-full object-cover"
               />
             ) : initials ? (
