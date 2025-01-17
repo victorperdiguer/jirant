@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search, Trash2, CheckCircle2, CheckSquare, LinkIcon } from "lucide-react";
+import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search, Trash2, CheckCircle2, CheckSquare, LinkIcon, BookDashed } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { defaultTicketTypes } from "@/config/ticketTypeIcons";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -51,6 +51,8 @@ export function Sidebar() {
   const [selectedTicketId, setSelectedTicketId] = useState<string | undefined>(undefined);
   const [relationshipType, setRelationshipType] = useState<string>('');
   const [linkableTicketId, setLinkableTicketId] = useState<string | null>(null);
+  const pathname = usePathname();
+  const isTemplatesPage = pathname === '/templates';
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -310,10 +312,10 @@ export function Sidebar() {
           </Button>
         </div>
 
-        <Link href="/templates">
+        <Link href={isTemplatesPage ? "/workspace" : "/templates"}>
           <Button variant="outline" className="w-full justify-start gap-2 mb-4">
-            <FileText className="h-4 w-4" />
-            Plantillas
+            {isTemplatesPage ?  <FileText className="h-4 w-4" /> : <BookDashed className="h-4 w-4" />}
+            {isTemplatesPage ? "Tickets" : "Templates"}
           </Button>
         </Link>
 
