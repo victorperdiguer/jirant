@@ -18,7 +18,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AudioWaveform } from './AudioWaveform';
-import { useSession } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
+import { useToast } from "@/hooks/use-toast";
+
 
 interface Ticket {
   _id: string;
@@ -51,6 +53,7 @@ export function WorkspaceMain() {
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const { data: session } = useSession();
+  const { toast } = useToast();
   
   useAutoResize(textareaRef);
 
@@ -105,7 +108,30 @@ export function WorkspaceMain() {
     setSelectedType(typeId);
   };
 
+  const showAuthWarning = () => {
+    toast({
+      title: "Authentication Required",
+      description: "Please sign in to use this feature.",
+      variant: "destructive",
+      action: (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => signIn('google', { prompt: 'select_account', callbackUrl: window.location.pathname })}
+          className="border-white hover:bg-white/20 text-black hover:text-white"
+        >
+          Sign in
+        </Button>
+      ),
+    });
+  };
+
   const handleSend = async () => {
+    if (!session) {
+      showAuthWarning();
+      return;
+    }
+
     if (!input.trim() || !selectedType || isProcessing) return;
 
     const userMessage = input.trim();
@@ -322,6 +348,12 @@ export function WorkspaceMain() {
   };
 
   const handleRecording = useCallback(async () => {
+    if (!session) {
+      console.log(session)
+      showAuthWarning();
+      return;
+    }
+
     if (isRecording) {
       mediaRecorder?.stop();
       setIsRecording(false);
