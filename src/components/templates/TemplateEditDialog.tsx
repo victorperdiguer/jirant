@@ -172,7 +172,7 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave, onDelete
                 <div className="space-y-6 pr-4 pl-1">
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium mb-1 block">Nombre</label>
+                      <label className="text-sm font-medium mb-1 block">Name</label>
                       <Input
                         value={editedTemplate.name}
                         onChange={(e) => setEditedTemplate({...editedTemplate, name: e.target.value})}
@@ -180,7 +180,7 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave, onDelete
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium mb-1 block">Descripción</label>
+                      <label className="text-sm font-medium mb-1 block">Description</label>
                       <Textarea
                         value={editedTemplate.description || ''}
                         onChange={(e) => setEditedTemplate({...editedTemplate, description: e.target.value})}
@@ -190,7 +190,7 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave, onDelete
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium mb-1 block">Detalles</label>
+                      <label className="text-sm font-medium mb-1 block">Details</label>
                       <Textarea
                         value={editedTemplate.details || ''}
                         onChange={(e) => setEditedTemplate({...editedTemplate, details: e.target.value})}
@@ -202,7 +202,7 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave, onDelete
 
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <h3 className="text-sm font-medium">Estructura</h3>
+                      <h3 className="text-sm font-medium">Structure</h3>
                       <Button size="sm" variant="outline" onClick={addSection}>
                         <Plus className="h-4 w-4 mr-1" />
                         Add Section
@@ -312,7 +312,7 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave, onDelete
             <div className="flex-1 bg-muted/50 overflow-hidden flex flex-col">
               <ScrollArea className="flex-1 p-6">
                 <div className="space-y-4">
-                  <h2 className="text-lg font-semibold">Vista Previa</h2>
+                  <h2 className="text-lg font-semibold">Preview</h2>
                   <div className="bg-background rounded-lg p-6">
                     <h3 className="text-xl font-semibold mb-4">{editedTemplate.name}</h3>
                     {editedTemplate.templateStructure?.map((section, index) => (

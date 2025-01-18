@@ -403,8 +403,7 @@ export function WorkspaceMain() {
       {/* Header Section */}
       <div className="p-8 border-b">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-row items-center justify-start gap-4">
               <h1 className="text-3xl font-bold">Workspace</h1>
               <Button
                 variant="outline"
@@ -415,9 +414,6 @@ export function WorkspaceMain() {
                 <LinkIcon className="h-4 w-4" />
                 Add Context
               </Button>
-            </div>
-            <div className="flex items-center gap-4 mr-20">
-              <span className="text-sm text-muted-foreground">Template</span>
               <Select
                 value={selectedType}
                 onValueChange={handleTypeChange}
@@ -444,7 +440,6 @@ export function WorkspaceMain() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
           </div>
         </div>
       </div>
@@ -662,6 +657,7 @@ export function WorkspaceMain() {
               className="min-h-[60px] max-h-[200px]"
             />
           )}
+          
           <Button
             size="icon"
             variant={isRecording ? "destructive" : "outline"}

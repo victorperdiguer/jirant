@@ -113,7 +113,7 @@ export function Sidebar() {
   const groupTicketsByMonth = (tickets: Ticket[]): GroupedTickets => {
     return tickets.reduce((groups: GroupedTickets, ticket) => {
       const date = new Date(ticket.createdAt);
-      const monthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+      const monthYear = `${date.toLocaleString('en', { month: 'long' })} ${date.getFullYear()}`;
       
       if (!groups[monthYear]) {
         groups[monthYear] = [];
@@ -341,7 +341,7 @@ export function Sidebar() {
         <div className="relative">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar tickets..."
+            placeholder="Search tickets..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8 bg-background"
