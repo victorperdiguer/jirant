@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { UserButton } from '@/components/UserButton';
 import { useSession } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 
 
 export default function TemplatesPage() {
@@ -153,7 +154,30 @@ export default function TemplatesPage() {
     }
   };
 
+  const showAuthWarning = () => {
+    toast({
+      title: "Authentication Required",
+      description: "Please sign in to use this feature.",
+      variant: "destructive",
+      action: (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => signIn('google', { prompt: 'select_account', callbackUrl: window.location.pathname })}
+          className="border-white hover:bg-white/20 text-black hover:text-white"
+        >
+          Sign in
+        </Button>
+      ),
+    });
+  };
+
   const handleCreateTemplate = () => {
+    if (!session) {
+      showAuthWarning();
+      return;
+    }
+
     const newTemplate: ITicketType = {
       _id: '',
       name: 'New Template',
