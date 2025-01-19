@@ -171,10 +171,7 @@ export function WorkspaceMain() {
         }),
       });
 
-      // Log the response for debugging
-      console.log('AI Response status:', aiResponse.status);
       const responseText = await aiResponse.text();
-      console.log('AI Response text:', responseText);
 
       if (!aiResponse.ok) {
         throw new Error(`Failed to process request: ${aiResponse.status} ${responseText}`);
@@ -182,9 +179,7 @@ export function WorkspaceMain() {
       
       // Parse the response as JSON after logging the text
       const data = JSON.parse(responseText);
-      console.log('Data:', data);
       const aiContent = data.generatedText as string;
-      console.log('AI Content:', aiContent);
       
       // Add AI response to messages
       setMessages(prev => [...prev, { role: 'assistant', content: aiContent }]);
@@ -233,8 +228,6 @@ export function WorkspaceMain() {
       }
 
     } catch (error) {
-      console.error('Error processing request:', error);
-      console.log('Full error:', { error });
       
       setMessages(prev => [...prev, { 
         role: 'assistant', 
@@ -361,7 +354,6 @@ export function WorkspaceMain() {
 
   const handleRecording = useCallback(async () => {
     if (!session) {
-      console.log(session)
       showAuthWarning();
       return;
     }

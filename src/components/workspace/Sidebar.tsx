@@ -154,12 +154,10 @@ export function Sidebar() {
             const key = `${template.name}-${template.createdBy || 'default'}`;
             acc[key] = template;
           }
-          console.log(template, "CHECK user id", session?.user?.id)
           return acc;
         }, {} as Record<string, ITicketType>);
         
         setTicketTypeMap(templateMap);
-        console.log(templateMap, "CHECK templateMap")
       } catch (error) {
         console.error('Error fetching templates:', error);
       }
