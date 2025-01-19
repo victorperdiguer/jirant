@@ -13,7 +13,7 @@ export async function GET() {
   try {
     await connectToDatabase();
     const ticketTypes = await TicketType.find({ createdBy: session.user.id })
-      .select('_id name description details templateStructure icon color tier')
+      .select('_id name description details templateStructure icon color tier createdBy')
       .sort({ name: 1 });
     console.log(ticketTypes);
     return NextResponse.json(ticketTypes);

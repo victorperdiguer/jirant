@@ -43,9 +43,11 @@ interface GroupedTickets {
 }
 
 interface ITicketType {
+  _id: string;
   name: string;
   icon: string;
   color: string;
+  createdBy: string | null;
 }
 
 export function Sidebar() {
@@ -145,13 +147,19 @@ export function Sidebar() {
         if (!response.ok) throw new Error('Failed to fetch templates');
         const templates: ITicketType[] = await response.json();
         
-        // Create a map of template name to template object
+        // Create a map of "name-userId" to template object
         const templateMap = templates.reduce((acc, template) => {
-          acc[template.name] = template;
+          // Use default templates (createdBy is null) or user's own templates
+          if (template.createdBy === null || template.createdBy === session.user?.id) {
+            const key = `${template.name}-${template.createdBy || 'default'}`;
+            acc[key] = template;
+          }
+          console.log(template, "CHECK user id", session?.user?.id)
           return acc;
         }, {} as Record<string, ITicketType>);
         
         setTicketTypeMap(templateMap);
+        console.log(templateMap, "CHECK templateMap")
       } catch (error) {
         console.error('Error fetching templates:', error);
       }
@@ -161,14 +169,16 @@ export function Sidebar() {
   }, [session]);
 
   const getIcon = (ticketType: string) => {
-    // Get template by ticket type name
-    const template = ticketTypeMap[ticketType];
+    // Try to find user's custom template first, then fall back to default
+    const userTemplateKey = `${ticketType}-${session?.user?.id}`;
+    const defaultTemplateKey = `${ticketType}-default`;
+    
+    const template = ticketTypeMap[userTemplateKey] || ticketTypeMap[defaultTemplateKey];
+    
     if (!template) {
-      // Fallback to default icon if template not found
       return <CheckSquare className="h-4 w-4 text-blue-500" />;
     }
     
-    // Use the template's icon configuration
     const iconConfig = defaultTicketTypes[template.icon];
     if (!iconConfig) return null;
     
