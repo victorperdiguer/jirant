@@ -364,7 +364,7 @@ export function Sidebar() {
         <div className="flex items-center justify-between mb-6">
           <Link href="/" className="flex items-center space-x-2">
             {logo}
-            <span className="font-semibold text-2xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60 leading pt-1">Jira'nt</span>
+            <span className="font-semibold text-2xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60 leading pt-1">Jira&apos;nt</span>
           </Link>
           <Button
             className="pt-1"
