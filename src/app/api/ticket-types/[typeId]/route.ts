@@ -15,7 +15,7 @@ export async function PUT(
 
     // Remove _id from update data if it exists
     const { _id, ...updateFields } = updateData;
-
+    console.log(_id)
     // Validate required fields
     if (!updateFields.name || !updateFields.icon || !updateFields.color || !updateFields.details) {
       return NextResponse.json(
@@ -138,41 +138,3 @@ export async function DELETE(
     );
   }
 }
-
-/* export async function PATCH(
-  request: Request,
-  { params }: { params: { typeId: string } }
-) {
-  try {
-    await connectToDatabase();
-    const body = await request.json();
-
-    const updatedType = await TicketType.findByIdAndUpdate(
-      params.typeId,
-      {
-        name: body.name,
-        description: body.description,
-        details: body.details,
-        templateStructure: body.templateStructure,
-        icon: body.icon,
-        color: body.color,
-      },
-      { new: true }
-    );
-
-    if (!updatedType) {
-      return NextResponse.json(
-        { error: 'Template not found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(updatedType);
-  } catch (error) {
-    console.error('Error updating ticket type:', error);
-    return NextResponse.json(
-      { error: 'Failed to update template' },
-      { status: 500 }
-    );
-  }
-}  */

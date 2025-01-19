@@ -48,7 +48,6 @@ export function WorkspaceMain() {
   const [contextTickets, setContextTickets] = useState<Ticket[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   const [recordingStream, setRecordingStream] = useState<MediaStream | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -265,7 +264,7 @@ export function WorkspaceMain() {
 
     window.addEventListener('displayTicket', handleDisplayTicket);
     return () => window.removeEventListener('displayTicket', handleDisplayTicket);
-  }, [ticketTypes]);
+  }, [ticketTypes, setActiveTicketId]);
 
   useEffect(() => {
     // Check for pending ticket display
@@ -304,7 +303,7 @@ export function WorkspaceMain() {
     return () => {
       window.removeEventListener('clearWorkspace', handleClearWorkspace);
     };
-  }, [ticketTypes]);
+  }, [ticketTypes, setActiveTicketId]);
 
   const getIcon = (ticketTypeOrName: ITicketType | string) => {
     let iconKey: string;
@@ -413,7 +412,7 @@ export function WorkspaceMain() {
         console.error('Error accessing microphone:', error);
       }
     }
-  }, [isRecording, mediaRecorder]);
+  }, [isRecording, mediaRecorder, session, showAuthWarning]);
 
   useEffect(() => {
     if (!isRecording) {
@@ -432,7 +431,7 @@ export function WorkspaceMain() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isRecording]);
+  }, [isRecording, handleRecording]);
 
   return (
     <div className="flex-1 flex flex-col h-full">
@@ -521,7 +520,7 @@ export function WorkspaceMain() {
             <Input
               placeholder="Search tickets..."
               className="w-full"
-              onChange={(e) => {
+              onChange={() => {
                 // Add ticket search logic here
               }}
             />

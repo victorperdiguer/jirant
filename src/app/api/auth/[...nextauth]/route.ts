@@ -3,7 +3,6 @@ import GoogleProvider from 'next-auth/providers/google';
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
 import { getMongoClient } from '../../../../../lib/mongodb';
 import TicketType from '../../../../../models/TicketType';
-import User from '../../../../../models/User';
 import { defaultTemplates } from '@/config/defaultTemplates';
 
 export const authOptions: NextAuthOptions = {
@@ -26,7 +25,7 @@ export const authOptions: NextAuthOptions = {
       try {
         // This event is triggered after the user is created in MongoDB
         // user._id will be the MongoDB ObjectId
-        const createdTemplates = await Promise.all(
+        await Promise.all(
           defaultTemplates.map(template =>
             TicketType.create({
               ...template,

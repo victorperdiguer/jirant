@@ -1,8 +1,7 @@
 'use client'
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Brain, Sparkles, Link2, Clock, MessageSquare } from "lucide-react";
-import Link from "next/link";
+import { Check, Brain, Link2, MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
@@ -22,7 +21,7 @@ export default function Home() {
               {logo}
             </div>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-              Meet <span className="text-4xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">Jira'nt</span>, your
+              Meet <span className="text-4xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">Jira&apos;nt</span>, your
               <span className="bg-gradient-to-r from-primary to-primary/70 text-primary-foreground px-4 mx-2 rounded-md">
                 smarter
               </span>
@@ -30,7 +29,7 @@ export default function Home() {
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-2xl">
-              Let Jira'nt handle the tedious parts of product management while you focus on what matters.
+              Let Jira&apos;nt handle the tedious parts of product management while you focus on what matters.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -58,7 +57,7 @@ export default function Home() {
       <section className="px-4 py-20 bg-muted/50">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Why Jira'nt?</h2>
+            <h2 className="text-3xl font-bold mb-4">Why Jira&apos;nt?</h2>
             <p className="text-muted-foreground">Everything you need to manage products effectively</p>
           </div>
 {/*           <div className="flex flex-row flex-wrap justify-center gap-8">
@@ -122,16 +121,16 @@ export default function Home() {
       {/* CTA Section */}
       <section className="px-4 py-20 bg-muted">
         <div className="container mx-auto max-w-6xl text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to transform your product management with Jira'nt?</h2>
+          <h2 className="text-3xl font-bold mb-4">Ready to transform your product management with Jira&apos;nt?</h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            Join product managers who are shipping better products faster with Jira'nt.
+            Join product managers who are shipping better products faster with Jira&apos;nt.
           </p>
           <Button 
             size="lg" 
             className="h-12 px-8"
             onClick={handleStartClick}
           >
-            Try Jira'nt Free
+            Try Jira&apos;nt Free
           </Button>
         </div>
       </section>

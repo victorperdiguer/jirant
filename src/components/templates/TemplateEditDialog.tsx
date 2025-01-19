@@ -32,7 +32,6 @@ interface TemplateEditDialogProps {
 export function TemplateEditDialog({ template, isOpen, onClose, onSave, onDelete, onRestore }: TemplateEditDialogProps) {
   const { toast } = useToast();
   const [editedTemplate, setEditedTemplate] = useState<ITicketType>({...template});
-  const [previewContent, setPreviewContent] = useState("");
   const [selectedIcon, setSelectedIcon] = useState(template?.icon || 'task');
   const [selectedColor, setSelectedColor] = useState(template?.color || 'text-blue-500');
   const [selectedTier, setSelectedTier] = useState(template?.tier || 3);
@@ -277,7 +276,7 @@ export function TemplateEditDialog({ template, isOpen, onClose, onSave, onDelete
                         </HoverCardTrigger>
                         <HoverCardContent className="w-[200px] p-2">
                           <p className="text-sm text-muted-foreground">
-                            Tier 1 is highest hierarchy, Tier 5 is lowest. This determines which tickets "belong" to which other tickets after linking them.
+                            Tier 1 is highest hierarchy, Tier 5 is lowest. This determines which tickets belong to which other tickets after linking them.
                           </p>
                         </HoverCardContent>
                       </HoverCard>

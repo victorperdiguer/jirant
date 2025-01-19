@@ -12,7 +12,7 @@ export default function SignIn() {
       <div className="w-full max-w-md space-y-8 p-8">
         <div className="text-center">
           <img src="/logo.svg" alt="Logo" className="h-12 mx-auto" />
-          <h2 className="mt-6 text-3xl font-bold">Welcome to Jira'nt</h2>
+          <h2 className="mt-6 text-3xl font-bold">Welcome to Jirant</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Sign in to continue to the workspace
           </p>

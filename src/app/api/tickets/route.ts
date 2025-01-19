@@ -7,7 +7,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/route';
 
 // GET: Fetch all tickets
-export async function GET(request: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions);
   
   if (!session) {
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(tickets, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch tickets' }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to fetch tickets', error: error}, { status: 500 });
   }
 }
 

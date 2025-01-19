@@ -2,10 +2,9 @@
 import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, CheckCircle2 } from "lucide-react";
+import { Plus, CheckCircle2 } from "lucide-react";
 import { ITicketType } from '@/types/ticket-types';
 import { TemplateEditDialog } from "@/components/templates/TemplateEditDialog";
-import Link from "next/link";
 import { Sidebar } from "@/components/workspace/Sidebar";
 import { defaultTicketTypes } from "@/config/ticketTypeIcons";
 import { cn } from "@/lib/utils";
@@ -18,7 +17,7 @@ import { signIn } from 'next-auth/react';
 export default function TemplatesPage() {
   const { toast } = useToast();
   const [templates, setTemplates] = useState<ITicketType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [_, setIsLoading] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState<ITicketType | null>(null);
   const { data: session } = useSession();
 
@@ -233,7 +232,7 @@ export default function TemplatesPage() {
 
   const handleRestoreTemplate = async (template: ITicketType) => {
     try {
-      const { _id, ...templateWithoutId } = template;
+      const { ...templateWithoutId } = template;
       const response = await fetch('/api/ticket-types', {
         method: 'POST',
         headers: {

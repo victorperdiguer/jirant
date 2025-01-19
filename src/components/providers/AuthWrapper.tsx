@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
 export function AuthWrapper({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -42,7 +42,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
             </svg>
           </div>
           <span className="text-2xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
-            Jira'nt
+            Jira&apos;nt
           </span>
         </div>
       </div>

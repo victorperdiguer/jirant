@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {connectToDatabase} from '../../../../lib/mongodb';
 import TicketType from '../../../../models/TicketType';
-import User from '../../../../models/User';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/route';
 

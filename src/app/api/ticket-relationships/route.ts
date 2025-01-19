@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
 import TicketRelationship from '../../../../models/TicketRelationship';
 import { connectToDatabase } from '../../../../lib/mongodb';
 
