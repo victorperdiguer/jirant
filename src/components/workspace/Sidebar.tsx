@@ -42,6 +42,12 @@ interface GroupedTickets {
   [key: string]: Ticket[];
 }
 
+interface ITicketType {
+  name: string;
+  icon: string;
+  color: string;
+}
+
 export function Sidebar() {
   const { toast } = useToast();
   const [tickets, setTickets] = useState<GroupedTickets>({});
@@ -56,6 +62,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const isTemplatesPage = pathname === '/templates';
   const { data: session } = useSession();
+  const [ticketTypeMap, setTicketTypeMap] = useState<Record<string, ITicketType>>({});
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -129,13 +136,44 @@ export function Sidebar() {
     }, {});
   };
 
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      if (!session) return;
+      
+      try {
+        const response = await fetch('/api/ticket-types');
+        if (!response.ok) throw new Error('Failed to fetch templates');
+        const templates: ITicketType[] = await response.json();
+        
+        // Create a map of template name to template object
+        const templateMap = templates.reduce((acc, template) => {
+          acc[template.name] = template;
+          return acc;
+        }, {} as Record<string, ITicketType>);
+        
+        setTicketTypeMap(templateMap);
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+      }
+    };
+
+    fetchTemplates();
+  }, [session]);
+
   const getIcon = (ticketType: string) => {
-    const type = ticketType.toLowerCase().replace(/\s+/g, '-');
-    const iconConfig = defaultTicketTypes[type];
-    if (!iconConfig) return <CheckSquare className="h-4 w-4" />;
+    // Get template by ticket type name
+    const template = ticketTypeMap[ticketType];
+    if (!template) {
+      // Fallback to default icon if template not found
+      return <CheckSquare className="h-4 w-4 text-blue-500" />;
+    }
+    
+    // Use the template's icon configuration
+    const iconConfig = defaultTicketTypes[template.icon];
+    if (!iconConfig) return null;
     
     const Icon = iconConfig.icon;
-    return <Icon className={cn("h-4 w-4", iconConfig.color)} />;
+    return <Icon className={cn("h-4 w-4", template.color)} />;
   };
 
   const handleTicketClick = (ticket: Ticket) => {
