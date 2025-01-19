@@ -60,8 +60,20 @@ export function WorkspaceMain() {
   useEffect(() => {
     const fetchTicketTypes = async () => {
       try {
+        if (!session) {
+          setTicketTypes([]);
+          setIsLoading(false);
+          return;
+        }
+
         const response = await fetch('/api/ticket-types');
-        if (!response.ok) throw new Error('Failed to fetch ticket types');
+        if (!response.ok) {
+          if (response.status === 401) {
+            setTicketTypes([]);
+            return;
+          }
+          throw new Error('Failed to fetch ticket types');
+        }
         const data = await response.json();
         setTicketTypes(data);
         if (data.length > 0) {
@@ -75,7 +87,7 @@ export function WorkspaceMain() {
     };
 
     fetchTicketTypes();
-  }, []);
+  }, [session]);
 
   useEffect(() => {
     const fetchTickets = async () => {

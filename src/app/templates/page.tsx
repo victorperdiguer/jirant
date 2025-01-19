@@ -25,8 +25,20 @@ export default function TemplatesPage() {
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
+        if (!session) {
+          setTemplates([]);
+          setIsLoading(false);
+          return;
+        }
+
         const response = await fetch('/api/ticket-types');
-        if (!response.ok) throw new Error('Failed to fetch templates');
+        if (!response.ok) {
+          if (response.status === 401) {
+            setTemplates([]);
+            return;
+          }
+          throw new Error('Failed to fetch templates');
+        }
         const data = await response.json();
         
         // Sort templates by tier (ascending) and then alphabetically
@@ -48,7 +60,7 @@ export default function TemplatesPage() {
     };
 
     fetchTemplates();
-  }, []);
+  }, [session]);
 
   const getIcon = (template: ITicketType) => {
     const iconConfig = defaultTicketTypes[template.icon];
