@@ -245,8 +245,20 @@ export default function TemplatesPage() {
       if (!response.ok) throw new Error('Failed to restore template');
       const restoredTemplate = await response.json();
       
-      // Update local state
-      setTemplates([...templates, restoredTemplate]);
+      // Update local state - ensure we don't add duplicates
+      setTemplates(prevTemplates => {
+        // Check if template already exists
+        const exists = prevTemplates.some(t => t._id === restoredTemplate._id);
+        if (exists) return prevTemplates;
+        
+        // Sort templates when adding new one
+        return [...prevTemplates, restoredTemplate].sort((a, b) => {
+          if (a.tier !== b.tier) {
+            return a.tier - b.tier;
+          }
+          return a.name.localeCompare(b.name);
+        });
+      });
     } catch (error) {
       throw error; // Let the TemplateEditDialog handle the error
     }
