@@ -5,11 +5,11 @@ import TicketRelationship from '../../../../../../models/TicketRelationship';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { ticketId: string } }
+  context: { params: { ticketId: string } }
 ) {
   try {
     await connectToDatabase();
-    const { ticketId } = await params;
+    const { ticketId } = await context.params;
 
     // Find all relationships where this ticket is involved
     const relationships = await TicketRelationship.find({
