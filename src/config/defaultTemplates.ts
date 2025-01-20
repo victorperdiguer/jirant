@@ -6,7 +6,7 @@ export const defaultTemplates = [
     templateStructure: [
       {
         sectionTitle: "Description",
-        content: "Describe the bug and its impact"
+        content: "Describe the bug and its impact. Be thorough and include all relevant details."
       },
       {
         sectionTitle: "Steps to Reproduce",
@@ -22,20 +22,28 @@ export const defaultTemplates = [
     tier: 1
   },
   {
-    name: "Feature Request",
+    name: "User Story",
     description: "Suggest a new feature or enhancement",
     details: "Use this template to propose new features",
     templateStructure: [
       {
+        sectionTitle: "User Story Goal",
+        content: "State the goal of the user story with the format:As a [role], I want [feature] so that [benefit]."
+      },
+      {
         sectionTitle: "Description",
-        content: "Describe the feature you'd like"
+        content: "Describe the feature in detail. What is expected to be achieved, and how it will be achieved."
       },
       {
         sectionTitle: "Use Case",
-        content: "Explain how this would be useful"
+        content: "Give an example of how this would be used"
+      },
+      {
+        sectionTitle: "Acceptance Criteria",
+        content: "What are the criteria for this user story to be considered complete? List them out."
       }
     ],
-    icon: "lightbulb",
+    icon: "user-story",
     color: "text-yellow-500",
     tier: 2
   },
