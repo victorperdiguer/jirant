@@ -4,9 +4,7 @@ import "./globals.css";
 import Providers from "@/providers";
 import { SidebarProvider } from '@/context/SidebarContext';
 import { Toaster } from "@/components/ui/toaster";
-import { getServerSession } from 'next-auth';
 import { SessionProvider } from '@/components/providers/SessionProvider';
-import { authOptions } from './api/auth/[...nextauth]/route';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

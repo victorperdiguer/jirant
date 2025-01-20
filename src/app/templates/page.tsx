@@ -17,7 +17,7 @@ import { signIn } from 'next-auth/react';
 export default function TemplatesPage() {
   const { toast } = useToast();
   const [templates, setTemplates] = useState<ITicketType[]>([]);
-  const [_, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState<ITicketType | null>(null);
   const { data: session } = useSession();
 

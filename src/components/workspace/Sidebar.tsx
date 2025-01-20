@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Bug, FileText, Zap, Lightbulb, Plus, MoreVertical, Search, Trash2, CheckCircle2, CheckSquare, LinkIcon, BookDashed, SquarePen } from "lucide-react";
+import { FileText, MoreVertical, Search, Trash2, CheckCircle2, CheckSquare, LinkIcon, BookDashed, SquarePen } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 
 interface Ticket {
   _id: string;
@@ -295,6 +294,7 @@ export function Sidebar() {
                 title: "Error",
                 description: "Failed to restore ticket.",
               });
+              console.log(error)
             }
           }}>
             Undo

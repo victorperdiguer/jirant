@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import {connectToDatabase} from '../../../../../lib/mongodb';
 import Ticket from '../../../../../models/Ticket';
-import User from '../../../../../models/User';
 
 // Connect to the database
 await connectToDatabase();
