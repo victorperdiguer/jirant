@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '../../../../../../lib/mongodb';
 import Ticket from '../../../../../../models/Ticket';
 import TicketType from '../../../../../../models/TicketType';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
@@ -9,8 +11,14 @@ export async function GET(
 ) {
   try {
     await connectToDatabase();
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const typeId = (await params).typeId;
-    console.log("tickettype ID",typeId)
+    console.log("tickettype ID", typeId);
     
     const ticketType = await TicketType.findById(typeId);
     if (!ticketType) {
@@ -18,12 +26,14 @@ export async function GET(
     }
     
     const ticketTypeName = ticketType.name;
-    // Find any active tickets using this template
+    // Find any active tickets using this template that belong to the current user
     const ticketsUsingTemplate = await Ticket.find({
       ticketType: ticketTypeName,
-      status: { $ne: 'deleted' }
+      status: { $ne: 'deleted' },
+      createdBy: session.user.id
     });
-    console.log(ticketsUsingTemplate);
+    
+    console.log('Tickets using template:', ticketsUsingTemplate);
 
     return NextResponse.json({
       isInUse: ticketsUsingTemplate.length > 0,
