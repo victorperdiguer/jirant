@@ -4,16 +4,18 @@ import Ticket from '../../../../../../models/Ticket';
 import TicketType from '../../../../../../models/TicketType';
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { typeId: string } }
 ) {
   try {
     await connectToDatabase();
-    const { typeId } = await params;
+    const typeId = await params.typeId;
+    
     const ticketType = await TicketType.findById(typeId);
     if (!ticketType) {
       return NextResponse.json({ error: 'Ticket type not found' }, { status: 404 });
     }
+    
     const ticketTypeName = ticketType.name;
     // Find any active tickets using this template
     const ticketsUsingTemplate = await Ticket.find({
