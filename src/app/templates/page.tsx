@@ -211,6 +211,7 @@ export default function TemplatesPage() {
 
   const handleDeleteTemplate = async (template: ITicketType) => {
     try {
+      console.log("template ID",template._id)
       const response = await fetch(`/api/ticket-types/${template._id}`, {
         method: 'DELETE',
       });

@@ -3,12 +3,12 @@ import { connectToDatabase } from '../../../../../lib/mongodb';
 import TicketType from '../../../../../models/TicketType';
 
 export async function PUT(
-  request: NextRequest
+  request: NextRequest,
+  { params }: { params: Promise<{ typeId: string }> }
 ) {
   await connectToDatabase();
   try {
-    const { searchParams } = new URL(request.url);
-    const typeId = searchParams.get('typeId');
+    const typeId = (await params).typeId;
     const updateData = await request.json();
 
     // Remove _id from update data if it exists
@@ -81,13 +81,13 @@ export async function PUT(
 
 // Optionally add GET and DELETE methods for individual ticket types
 export async function GET(
-  request: NextRequest
+  request: NextRequest,
+  { params }: { params: Promise<{ typeId: string }> }
 ) {
   await connectToDatabase();
 
   try {
-    const { searchParams } = new URL(request.url);
-    const typeId = searchParams.get('typeId');
+    const typeId = (await params).typeId;
     const ticketType = await TicketType.findById(typeId);
 
     if (!ticketType) {
@@ -107,13 +107,14 @@ export async function GET(
 }
 
 export async function DELETE(
-  request: NextRequest
+  request: NextRequest,
+  { params }: { params: Promise<{ typeId: string }> }
+
 ) {
   await connectToDatabase();
 
   try {
-    const { searchParams } = new URL(request.url);
-    const typeId = searchParams.get('typeId');
+    const typeId = (await params).typeId;
     const deletedTicketType = await TicketType.findByIdAndDelete(typeId);
 
     if (!deletedTicketType) {
