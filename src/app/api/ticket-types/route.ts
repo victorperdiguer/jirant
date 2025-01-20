@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {connectToDatabase} from '../../../../lib/mongodb';
 import TicketType from '../../../../models/TicketType';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
 export async function GET() {
   const session = await getServerSession(authOptions);

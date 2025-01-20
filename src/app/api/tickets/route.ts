@@ -4,7 +4,7 @@ import Ticket from '../../../../models/Ticket';
 import User from '../../../../models/User';
 import { generateTicketTitle } from '@/lib/openai';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
 // GET: Fetch all tickets
 export async function GET() {
