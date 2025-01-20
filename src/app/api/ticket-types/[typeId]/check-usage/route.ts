@@ -4,12 +4,12 @@ import Ticket from '../../../../../../models/Ticket';
 import TicketType from '../../../../../../models/TicketType';
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { typeId: string } }
+  request: NextRequest
 ) {
   try {
     await connectToDatabase();
-    const typeId = await params.typeId;
+    const { searchParams } = new URL(request.url);
+    const typeId = searchParams.get('typeId');
     
     const ticketType = await TicketType.findById(typeId);
     if (!ticketType) {
