@@ -6,10 +6,11 @@ import Ticket from '../../../../../models/Ticket';
 await connectToDatabase();
 
 // GET: Fetch a specific ticket by ID
-export async function GET(request: Request, { params }: { params: { ticketId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ ticketId: string }>}) {
   try {
     // No need to populate ticketType
-    const ticket = await Ticket.findById(params.ticketId).populate('relatedTickets');
+    const ticketId = (await params).ticketId;
+    const ticket = await Ticket.findById(ticketId).populate('relatedTickets');
     if (!ticket) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
     }
@@ -21,12 +22,12 @@ export async function GET(request: Request, { params }: { params: { ticketId: st
 }
 
 // PATCH: Update a specific ticket by ID
-export async function PATCH(request: Request, { params }: { params: { ticketId: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ ticketId: string }>}) {
   try {
     await connectToDatabase();
 
     const body = await request.json();
-    const { ticketId } = params;
+    const ticketId = (await params).ticketId;
 
     const ticket = await Ticket.findByIdAndUpdate(
       ticketId,
@@ -52,9 +53,10 @@ export async function PATCH(request: Request, { params }: { params: { ticketId: 
 }
 
 // DELETE: Delete a specific ticket by ID
-export async function DELETE(request: Request, { params }: { params: { ticketId: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ ticketId: string }>}) {
   try {
-    const ticket = await Ticket.findByIdAndUpdate(params.ticketId, {status: "deleted", new: true});
+    const ticketId = (await params).ticketId;
+    const ticket = await Ticket.findByIdAndUpdate(ticketId, {status: "deleted", new: true});
     if (!ticket) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
     }
