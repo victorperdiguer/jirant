@@ -44,7 +44,7 @@ export const defaultTemplates = [
       }
     ],
     icon: "user-story",
-    color: "text-yellow-500",
+    color: "text-green-500",
     tier: 2
   },
   {
